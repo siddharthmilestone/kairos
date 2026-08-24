@@ -1,0 +1,16 @@
+# Project Kairos — Python dependencies
+# Python 3.9+ required. Install into a virtualenv (see SETUP.md / setup.sh).
+streamlit==1.41.1
+python-docx==1.2.0
+pypdf==6.14.2
+markdown2==2.5.5
+xhtml2pdf==0.2.17
+# optimize branch — crawl + schema extraction
+beautifulsoup4==4.15.0
+lxml==6.1.1
+playwright==1.60.0
+trafilatura==2.0.0   # best-quality main-content extraction (crawl.py falls back to DOM if absent)
+# transitive deps that xhtml2pdf/streamlit rely on (pinned for reproducibility)
+reportlab==4.5.1
+html5lib==1.1
+pillow==11.3.0

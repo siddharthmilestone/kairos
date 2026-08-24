@@ -1,0 +1,24 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# OS
+.DS_Store
+
+# Regenerable artifacts / caches
+data/_generated/
+data/_*.md
+data/_*.pdf
+*.zip
+
+# Local env
+.env
+.streamlit/secrets.toml
+
+# client-specific generated caches (regenerable via scripts/prewarm.py)
+data/_cache/
+
+# local editor/agent config
+.claude/
