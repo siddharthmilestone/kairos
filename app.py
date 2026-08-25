@@ -250,6 +250,57 @@ def render_topic_picker(records: list[dict], key_prefix: str, show_match: bool =
 _STATUS_ICON = {"pass": "&#10003;", "warn": "!", "fail": "&#10007;"}  # check / bang / cross (no emoji)
 
 
+_FAQ_HEAD_RE = re.compile(r"^\s{0,3}##\s+.*frequently asked question", re.I)
+_H3_RE = re.compile(r"^\s{0,3}###\s+")
+_H12_RE = re.compile(r"^\s{0,3}#{1,2}\s+")
+
+
+def render_publish_blocks(blocks: list[dict], recs_by_idx: dict):
+    """Render the publish-ready content block by block, but present the FAQ section as clean
+    accordions (each question → an expander) instead of a wall of headings and paragraphs."""
+    faq_mode = False
+    for b in blocks:
+        md_b = b["md"]
+        first = md_b.lstrip().split("\n", 1)[0]
+        is_h3 = bool(_H3_RE.match(first))
+        rec = recs_by_idx.get(b["index"])
+
+        # start of the FAQ section — render a styled header, then switch to accordion mode
+        if _FAQ_HEAD_RE.match(first):
+            faq_mode = True
+            st.markdown(
+                "<div class='cs-faq-head'>Frequently Asked Questions</div>"
+                "<div class='cs-faq-sub'>The answers guests and AI engines look for, ready to lift.</div>",
+                unsafe_allow_html=True)
+            intro = re.sub(r"^\s{0,3}##\s+.*\n?", "", md_b, count=1).strip()
+            if intro:
+                st.markdown(intro)
+            continue
+
+        # a new H1/H2 ends the FAQ section
+        if faq_mode and _H12_RE.match(first) and not is_h3:
+            faq_mode = False
+
+        if faq_mode and is_h3:
+            question = re.sub(r"^\s{0,3}###\s+", "", first).strip().rstrip("?") + "?"
+            answer = re.sub(r"^\s{0,3}###\s+.*\n?", "", md_b, count=1).strip()
+            with st.expander(question):
+                st.markdown(answer or "_(no answer generated)_")
+                if rec:
+                    with st.popover("ⓘ validation"):
+                        render_block_popover(rec)
+            continue
+
+        c1, c2 = st.columns([28, 1])
+        c1.markdown(md_b)
+        with c2:
+            with st.popover("ⓘ"):
+                if rec:
+                    render_block_popover(rec)
+                else:
+                    st.caption("No validation record for this block.")
+
+
 def render_block_popover(rec: dict):
     """Popover body: block score, 7-point data-findings checklist, CMG subgraph (inline SVG)."""
     score = rec.get("score")
@@ -393,8 +444,8 @@ def bundle_graph(bundle: dict, used_labels: list[str]):
             nodes.append({"id": nid or lab, "label": lab, "type": etype,
                           "used": is_used, "_deg": len(relations)})
             for rel in relations:
-                if isinstance(rel, str) and "" in rel:
-                    rn, tgt = rel.split("", 1)
+                if isinstance(rel, str) and " → " in rel:
+                    rn, tgt = rel.split(" → ", 1)
                     rels.append({"source": nid or lab, "rel": rn.strip(), "target": tgt.strip()})
     total = len(nodes)
     used_count = sum(1 for n in nodes if n["used"])
@@ -1026,7 +1077,8 @@ def gather_business_grounding(seed_topic: str, light: bool = False):
 # ---- topic cache (get-or-generate via the persistent disk cache; shared with prewarm) ----
 def topics_cache_key(client: dict, page_snapshot: dict | None) -> str:
     return cache.key((client or {}).get("id") or (client or {}).get("name"),
-                     (page_snapshot or {}).get("url") or "create")
+                     (page_snapshot or {}).get("url") or "create",
+                     st.session_state.get("article_type", "Blog Article"))
 
 
 def get_topics(client: dict, page_snapshot: dict | None, *, n: int = 15, regenerate: bool = False):
@@ -1047,7 +1099,8 @@ def get_topics(client: dict, page_snapshot: dict | None, *, n: int = 15, regener
                                "grounding.)")
     _, data = topicgen.generate_topics(
         business_id=client["id"], business_name=client["name"], scope=scope,
-        grounding_bundle=bundle, page_snapshot=page_snapshot, n=n, model="haiku", use_cache=False)
+        grounding_bundle=bundle, page_snapshot=page_snapshot, n=n, model="haiku",
+        article_type=st.session_state.get("article_type", "Blog Article"), use_cache=False)
     ts = cache.save("topics", ck, data)
     return opportunities.normalize(data), ts
 
@@ -1918,16 +1971,7 @@ with main:
                         f"{len(recs_by_idx)} block scores · click the ⓘ beside any block for its "
                         f"validation checklist &amp; CMG graph</span>", unsafe_allow_html=True)
                     st.divider()
-                for b in blocks:
-                    c1, c2 = st.columns([28, 1])
-                    c1.markdown(b["md"])
-                    rec = recs_by_idx.get(b["index"])
-                    with c2:
-                        with st.popover("ⓘ"):
-                            if rec:
-                                render_block_popover(rec)
-                            else:
-                                st.caption("No validation record for this block.")
+                render_publish_blocks(blocks, recs_by_idx)
             with tabs[1]:
                 if st.session_state.get("validation_stale"):
                     st.warning("You applied an enhancement, the relationship graph, per-paragraph "

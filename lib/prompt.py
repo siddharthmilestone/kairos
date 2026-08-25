@@ -305,6 +305,17 @@ _PRESS_RELEASE_GUIDELINES = (
 
 # Per-format structure. Each block tells the writer the SHAPE this format must take, so the
 # output reads like a real Blog Post / Landing Page / How-To / etc. - not a generic article.
+# Shared, well-structured FAQ block — required on every long-form format (GEO/AEO retrieval
+# loves clean Q&A). Rendered as its own H2 with each question an H3 so the UI can style it.
+_FAQ_BLOCK = (
+    "- **`## Frequently Asked Questions`** (required): 4-6 real questions the reader still has - "
+    "draw them from the approved fan-out queries and genuine objections, not filler. Format each as "
+    "its own `### <the question, ending in ?>` followed by a direct-answer-first reply of 40-90 words. "
+    "Make every Q&A self-contained (name the subject, never 'it'/'this/'they') so an answer engine can "
+    "lift it standalone. Order by what the reader most wants to know. Do NOT pad to a round number - "
+    "quality over count.\n"
+)
+
 _FORMAT_GUIDES = {
     "blog article": (
         "# FORMAT - BLOG ARTICLE\n"
@@ -316,8 +327,7 @@ _FORMAT_GUIDES = {
         "(<=90 words). Use bullet lists for collections and a table when comparing 3+ things.\n"
         "- Weave in concrete, grounded specifics (real names, numbers, policies from the grounding) - the "
         "detail competitors lack.\n"
-        "- **FAQ**: a `## Frequently Asked Questions` block ONLY if there are genuine unresolved questions "
-        "(pull from the approved fan-out); each answer 40-90 words, direct-answer-first.\n"
+        + _FAQ_BLOCK +
         "- **Close**: a genuine, useful last section ending on a concrete next step tied to the CTA. Never "
         "a 'Conclusion'/'Summary' heading."
     ),
@@ -330,6 +340,7 @@ _FORMAT_GUIDES = {
         "one-line what-it-is, why it belongs / who it's for, and a concrete grounded detail. Every item "
         "must be materially useful - do NOT pad to hit a round number.\n"
         "- Use a short comparison **table** if the items share comparable attributes.\n"
+        + _FAQ_BLOCK +
         "- **Close**: a one-paragraph how-to-choose, ending on the next step."
     ),
     "how-to guide": (
@@ -341,6 +352,7 @@ _FORMAT_GUIDES = {
         "explanation of why, and the expected outcome of that step. Do not omit steps to be shorter.\n"
         "- Call out **warnings / common mistakes** inline where they matter.\n"
         "- **`## Troubleshooting`** (only if useful): the 2-4 things most likely to go wrong + the fix.\n"
+        + _FAQ_BLOCK +
         "- **Close**: the expected final result + a concrete next step. Consider `HowTo` schema in the ops pack."
     ),
     "comparison article": (
@@ -354,6 +366,7 @@ _FORMAT_GUIDES = {
         "extractable at a glance.\n"
         "- **One `## H2` per option**: what it is, **who it's best for**, and its **limitations**. Make "
         "trade-offs explicit; never declare an unqualified 'winner' - frame it by use case.\n"
+        + _FAQ_BLOCK +
         "- **Close**: a decision framework ('choose A if..., choose B if...') + next step."
     ),
     "landing page": (
@@ -364,8 +377,7 @@ _FORMAT_GUIDES = {
         "1-3 tight sentences or a short bullet list each. Lead with outcomes.\n"
         "- **Trust / proof**: include ONLY grounded, real proof (named amenities, awards, specifics from "
         "the grounding). Never invent testimonials, stats, or logos.\n"
-        "- **`## Frequently Asked Questions`**: 4-6 questions that handle the reader's real objections "
-        "before they convert.\n"
+        + _FAQ_BLOCK +
         "- **Primary CTA**: a clear, single next action aligned to intent, repeated once near the end. "
         "Persuasive but not hypey - no aggressive sales language. Keep the whole page tight and skimmable."
     ),
@@ -379,6 +391,7 @@ _FORMAT_GUIDES = {
         "anchor suggestions in the ops pack), where a subtopic deserves its own page.\n"
         "- Use tables/lists to organize breadth. Depth and authority matter here more than brevity, but "
         "every section must still earn its place.\n"
+        + _FAQ_BLOCK +
         "- **Close**: where to go next (the key supporting pages) + the CTA."
     ),
     "thought leadership": (
@@ -390,6 +403,7 @@ _FORMAT_GUIDES = {
         "grounded observation competitors don't have. Distinguish fact from informed opinion.\n"
         "- Support claims with grounded evidence; be confident but never exaggerate or use unsupported "
         "superlatives.\n"
+        + _FAQ_BLOCK +
         "- **Close**: the forward-looking implication - what it means for the reader and what to do about it."
     ),
     "newsletter": (

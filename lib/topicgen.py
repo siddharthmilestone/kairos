@@ -21,6 +21,36 @@ _FENCE = re.compile(r"<<<\s*TOPICS_JSON_START\s*>>>(.*?)<<<\s*TOPICS_JSON_END\s*
                     re.DOTALL | re.IGNORECASE)
 
 
+# What each output format is FOR — steers ideation so topics fit the selected format's
+# intent (a How-To needs a task the reader performs; a Comparison needs ≥2 real things to weigh;
+# a Landing Page needs a conversion-oriented offer, etc.). Keeps the set on-format instead of
+# generic blog angles.
+FORMAT_INTENT: dict[str, str] = {
+    "Blog Article": "editorial articles that answer a specific guest question or explore one angle in depth; informational/consideration intent.",
+    "Newsletter": "timely, roundup-style updates a subscriber would open — seasonal news, offers, what's new; each topic should suit a recurring email, not an evergreen pillar.",
+    "How-To Guide": "task-based topics the reader completes step by step (how to book X, how to choose Y, how to plan Z). Each MUST be an actionable task with a clear outcome, phrased as a 'How to …' angle.",
+    "Comparison Article": "topics that weigh TWO OR MORE real, grounded options against each other (suite A vs suite B, this property vs that experience, direct vs OTA). Each MUST name concrete things to compare — never a single-subject overview.",
+    "Listicle": "enumerable topics that resolve to a clean list (best X, N ways to Y, top things to Z). Each MUST be countable and scannable.",
+    "Landing Page": "conversion-oriented topics tied to a bookable offer, package, venue, or service — commercial/transactional intent, built to convert a searcher, not to inform generally.",
+    "Pillar Page": "broad, authoritative hub topics that can nest many subtopics (a comprehensive guide to a whole category/destination/experience). Each MUST be wide enough to anchor a content cluster.",
+    "Thought Leadership": "point-of-view topics that take a defensible stance on an industry shift, trend, or belief — expertise/authority intent, not how-to or promotional.",
+    "Press Release": "genuinely newsworthy announcements — openings, launches, partnerships, awards, renovations, milestones — with a clear news hook and timing.",
+    "News Article": "reported, timely topics tied to a recent or upcoming development the audience would consider news.",
+}
+
+
+def format_intent(article_type: str) -> str:
+    at = (article_type or "").strip()
+    guide = FORMAT_INTENT.get(at)
+    if not guide:
+        return ""
+    return (f"# TARGET CONTENT FORMAT: {at}\n"
+            f"Every opportunity will be produced as a **{at}**. Generate ONLY topics that genuinely suit "
+            f"this format: {guide}\n"
+            f"Set each `recommendation` to \"{at}\". Do NOT propose topics that would only work as a "
+            f"different format. If a strong idea doesn't fit {at}, reshape its angle so it does.\n")
+
+
 def _cache_key(business_id: str, page_url: str | None) -> str:
     raw = f"{business_id}|{page_url or 'create'}"
     return hashlib.sha1(raw.encode()).hexdigest()[:12]
@@ -68,7 +98,7 @@ def _trim_bundle(bundle: dict[str, Any], max_per_type: int = 6, max_ledger: int 
 
 def _build_prompt(business_name: str, grounding_bundle: dict[str, Any],
                   page_snapshot: dict[str, Any] | None, n: int, batch_note: str = "",
-                  lean: bool = True) -> str:
+                  lean: bool = True, article_type: str = "") -> str:
     grounding = render_grounding_context(_trim_bundle(grounding_bundle))
     llm = is_llm_bundle(grounding_bundle)
     gc_header = grounding_header(grounding_bundle)
@@ -123,6 +153,7 @@ browsing; this step is a fast planning pass.**
 # {gc_header}
 {grounding}
 {seed}
+{format_intent(article_type)}
 {value_policy}
 # TASK
 Produce EXACTLY {n} ranked content opportunities for {business_name}, ordered by score
@@ -195,8 +226,9 @@ def _output_schema(lean: bool) -> str:
     )
 
 
-def _one_batch(business_name, bundle, page_snapshot, nb, note, model) -> list[dict]:
-    out = generate.generate(_build_prompt(business_name, bundle, page_snapshot, nb, batch_note=note),
+def _one_batch(business_name, bundle, page_snapshot, nb, note, model, article_type="") -> list[dict]:
+    out = generate.generate(_build_prompt(business_name, bundle, page_snapshot, nb, batch_note=note,
+                                          article_type=article_type),
                             model=model, timeout=240, allow_tools=False)
     return _parse_topics(out).get("opportunities") or []
 
@@ -228,6 +260,7 @@ def generate_topics(*, business_id: str, business_name: str, scope: str,
                     grounding_bundle: dict[str, Any],
                     page_snapshot: dict[str, Any] | None = None,
                     n: int = 30, model: str = "haiku",
+                    article_type: str = "",
                     use_cache: bool = True) -> tuple[Path, dict]:
     """Generate (or load cached) topics. Returns (json_path, parsed_dict).
 
@@ -246,7 +279,8 @@ def generate_topics(*, business_id: str, business_name: str, scope: str,
     batches = _plan_batches(n)
     opps: list[dict] = []
     with _cf.ThreadPoolExecutor(max_workers=len(batches)) as ex:
-        futs = [ex.submit(_one_batch, business_name, grounding_bundle, page_snapshot, nb, note, model)
+        futs = [ex.submit(_one_batch, business_name, grounding_bundle, page_snapshot, nb, note, model,
+                          article_type)
                 for nb, note in batches]
         for f in futs:
             try:
@@ -254,7 +288,7 @@ def generate_topics(*, business_id: str, business_name: str, scope: str,
             except Exception:  # noqa: BLE001 — a failed batch is tolerated; others still fill the set
                 pass
     if not opps:  # every batch failed → one single pass so the user still gets topics
-        opps = _one_batch(business_name, grounding_bundle, page_snapshot, n, "", model)
+        opps = _one_batch(business_name, grounding_bundle, page_snapshot, n, "", model, article_type)
     # de-duplicate by core topic, cap at n
     seen, uniq = set(), []
     for o in opps:

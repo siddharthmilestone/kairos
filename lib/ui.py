@@ -271,6 +271,13 @@ div[data-testid="stExpander"] summary {{ padding:12px 16px !important; }}
 div[data-testid="stExpander"] summary:hover {{ background:{PANEL} !important; }}
 div[data-testid="stExpander"] summary p, div[data-testid="stExpander"] summary span {{
   font-weight:600 !important; color:{INK} !important; font-size:13.5px !important; }}
+/* FAQ section header — sets the accordion apart from body prose */
+.cs-faq-head {{ font-family:'Sora',Inter,sans-serif; font-weight:800; font-size:20.5px;
+  color:{INK}; margin:26px 0 2px; padding-top:16px; border-top:1px solid {LINE2};
+  display:flex; align-items:center; gap:10px; }}
+.cs-faq-head::before {{ content:""; width:5px; height:20px; border-radius:3px;
+  background:linear-gradient(180deg,{ACCENT},{ACCENT_DK}); }}
+.cs-faq-sub {{ color:{MUTED}; font-size:13px; margin:0 0 12px 15px; }}
 /* alerts: prominent + well-padded so errors/success read at a glance
    (Streamlit tints the background per kind - red/amber/green/blue - we keep that
    and add generous padding, a rounded shape, and readable text) */
