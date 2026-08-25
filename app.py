@@ -1071,6 +1071,8 @@ def _load_cached_topics(client: dict, page_snapshot: dict | None):
 # ---- content cache (replay an identical generation configuration instantly) ----
 _CONTENT_KEYS = ("generated_md", "content_blocks", "block_records", "validation_md",
                  "enhancements", "overall_block_score")
+# validation-derived keys — generated on demand in Review, NOT during the fast draft
+_VAL_KEYS = ("block_records", "validation_md", "enhancements", "overall_block_score")
 
 
 def content_cache_key(opp: dict, client: dict, mode: str) -> str:
@@ -1642,39 +1644,7 @@ with main:
 
     # -------------------------------------------------- preferences (brand voice + audience)
     elif key == "preferences":
-        st.markdown("<p class='cs-lede'>Set your <b>brand voice</b> and <b>target audience</b> once, "
-                    "every topic, question, and the final draft will be written to match them.</p>",
-                    unsafe_allow_html=True)
-
-        st.markdown("### Brand voice")
-        up = st.file_uploader("Upload a brand-voice document (.docx / .pdf / .txt / .md)",
-                              type=["docx", "pdf", "txt", "md", "markdown"])
-        if up is not None:
-            try:
-                text = docs.extract_text(up.name, up.getvalue())
-                st.success(f"Parsed **{up.name}**, {len(text):,} characters.")
-                st.session_state.brand_voice_text = st.text_area("Preview / edit", value=text[:4000], height=160)
-            except Exception as e:  # noqa: BLE001
-                st.error(f"Could not read document: {e}")
-        else:
-            st.session_state.brand_voice_text = st.text_area(
-                "…or paste brand-voice guidance", value=st.session_state.get("brand_voice_text", ""), height=120)
-
-        st.markdown("### Audience")
-        st.caption("Describe who the content is for, this builds the target persona.")
-        c1, c2 = st.columns(2)
-        gender = c1.selectbox("Gender identity", ["Any / mixed", "Female", "Male", "Non-binary", "Binary (M/F)"])
-        age = c2.selectbox("Age range", ["Any", "18–24", "25–34", "35–44", "45–54", "55–64", "65+"])
-        seg = c1.selectbox("Traveler segment", ["Couples", "Families / multigenerational", "Honeymooners",
-                                                "Wedding planners", "Groups / MICE", "Solo luxury",
-                                                "Wellness seekers", "Business travelers", "Other"])
-        region = c2.text_input("Origin / region")
-        interests = st.text_input("Interests / motivations (comma-separated)",
-                                  placeholder="fine dining, spa, beach, cultural experiences")
-        persona = (f"{gender} travelers, age {age}, segment: {seg}"
-                   + (f", from {region}" if region else "") + (f". Interests: {interests}" if interests else "."))
-        st.session_state.target_audience = persona
-        st.info(f"Persona  {persona}")
+        render_preferences()
         nav()
 
     # -------------------------------------------------- qa
@@ -1821,9 +1791,10 @@ with main:
                 has_data=bool(st.session_state.get("generated_md")),
                 generated_at=st.session_state.get("content_ts"), key="content",
                 generate_label=lbl, regenerate_label="Regenerate",
-                busy_hint="~5–7 minutes · research, write, KAIROS score + validate")
+                busy_hint="~3–4 minutes · research, write, KAIROS score")
             if st.session_state.get("generated_md"):
-                st.caption("Draft is ready, continue to **Review**, or Regenerate to rebuild it.")
+                st.caption("Draft is ready, continue to **Review**. Validation & scoring are optional and "
+                           "run on demand there, so this step stays fast.")
             if action:
                 scope = f"{client['id']}/primary"
                 with st.status("Working…", expanded=True) as status:
@@ -1872,51 +1843,21 @@ with main:
                     at = eff_type()
                     lang = st.session_state.get("output_language", "English")
                     try:
-                        import concurrent.futures as _cf
                         md = ui.run_with_progress(
                             lambda: generate.generate(fp, model=model), expected_seconds=210,
                             label="③ Research + write + KAIROS score/improve")
                         st.session_state.generated_md = md
                         sec_now = docs.split_sections(md)
-                        blocks = docs.split_blocks(sec_now["publish_content"])
-                        st.session_state.content_blocks = blocks
-
-                        def _bv():  # per-paragraph validation  fast model (structured, tools off)
-                            return blockval.run(
-                                blocks=blocks, brand_name=client["name"],
-                                brand_voice=st.session_state.get("brand_voice_text", ""),
-                                target_audience=st.session_state.get("target_audience", ""),
-                                opportunity=opp, grounding_bundle=bundle, model=fast_model())
-
-                        def _kve():  # enterprise validation  user's model (quality + live competitor web)
-                            return validation.run_validation(
-                                publish_content=sec_now["publish_content"], brand_name=client["name"],
-                                article_type=at, output_language=lang, grounding_bundle=bundle,
-                                opportunity=opp, model=model)
-
-                        def _enh():  # enhancement advisor  fast model (structured, tools off)
-                            return enhance.run(
-                                content=sec_now["publish_content"], brand_name=client["name"],
-                                opportunity=opp, fanout_queries=st.session_state.get("fanout_selected") or [],
-                                grounding_bundle=bundle, model=fast_model())
-
-                        def _validate_all():
-                            with _cf.ThreadPoolExecutor(max_workers=3) as ex:
-                                fbv, fkve, fenh = ex.submit(_bv), ex.submit(_kve), ex.submit(_enh)
-                                return fbv.result(), fkve.result(), fenh.result()
-
-                        br, vmd, enh = ui.run_with_progress(
-                            _validate_all, expected_seconds=200,
-                            label=f"④ Validating {len(blocks)} paragraphs + enterprise audit + advisor (concurrent)")
-                        st.session_state.block_records = br
-                        st.session_state.validation_md = vmd
-                        st.session_state.enhancements = enh
-                        st.session_state.overall_block_score = blockval.overall_score(
-                            st.session_state.block_records)
-                        # fresh draft  clear any previously-applied/dismissed enhancement state
+                        st.session_state.content_blocks = docs.split_blocks(sec_now["publish_content"])
+                        # Validation + scoring are now an optional, on-demand step in Review, so
+                        # the draft lands fast. Clear any prior validation + enhancement state.
+                        for _k in _VAL_KEYS:
+                            st.session_state.pop(_k, None)
                         st.session_state.applied_enhancements = []
                         st.session_state.dismissed_enh = []
-                        status.update(label="Done , content + validation ready", state="complete")
+                        st.session_state.content_ts = cache.save(
+                            "content", ckin, {k: st.session_state.get(k) for k in _CONTENT_KEYS})
+                        status.update(label="Publish-ready draft is ready", state="complete")
                         goto(step + 1); st.rerun()
                     except Exception as e:  # noqa: BLE001
                         status.update(label="Generation failed", state="error"); st.error(str(e))
@@ -1940,6 +1881,31 @@ with main:
             blocks = st.session_state.get("content_blocks") or docs.split_blocks(sec["publish_content"])
             recs_by_idx = {r["index"]: r for r in (st.session_state.get("block_records") or [])}
             overall = st.session_state.get("overall_block_score")
+
+            # --- optional validation & scoring (kept OUT of generation so the draft lands fast) ---
+            _val_done = overall is not None or bool(vmd)
+            if not _val_done:
+                vc1, vc2 = st.columns([3, 1.3])
+                vc1.markdown("<div class='cs-genstamp'><span class='dot'></span> Draft is ready. "
+                             "Per-paragraph validation, the KAIROS scorecard and competitive audit are "
+                             "<b>optional</b> and run on demand (2-4 min).</div>", unsafe_allow_html=True)
+                if vc2.button("Run validation & scoring", type="primary", use_container_width=True, key="run_val"):
+                    with st.spinner("Validating paragraphs + enterprise audit + advisor (2-4 min)…"):
+                        br, vmd2, e2, blks = validate_suite(
+                            sec["publish_content"], opp, client,
+                            st.session_state.get("grounding_bundle") or {},
+                            st.session_state.get("model", "opus"), at, lang)
+                    st.session_state.block_records = br
+                    st.session_state.validation_md = vmd2
+                    st.session_state.enhancements = e2
+                    st.session_state.content_blocks = blks
+                    st.session_state.overall_block_score = blockval.overall_score(br)
+                    st.session_state.dismissed_enh = []
+                    st.session_state.content_ts = cache.save(  # re-cache with validation filled in
+                        "content", content_cache_key(opp, client, st.session_state.get("mode", "create")),
+                        {k: st.session_state.get(k) for k in _CONTENT_KEYS})
+                    st.rerun()
+                st.divider()
 
             tabs = st.tabs(["Publish-Ready Content", "Reasoning & Enhancements",
                             "KAIROS Score & Audit", "Competitive Intelligence",

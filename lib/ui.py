@@ -35,7 +35,7 @@ NAV_LINE = "rgba(255,255,255,.08)"
 
 CSS = f"""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap');
 
 :root {{ color-scheme: light !important; }}
 html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"], .main {{
@@ -43,8 +43,8 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"], 
 #MainMenu, header[data-testid="stHeader"], footer {{ visibility:hidden; height:0; }}
 [data-testid="stToolbar"] {{ display:none; }}
 /* work canvas: capped + centered so the full app (264px rail + content) frames to ~1440 */
-.block-container {{ padding-top:1.5rem; padding-bottom:5rem; max-width:1180px; margin:0 auto;
-  background:transparent !important; }}
+.block-container {{ padding-top:2.4rem; padding-bottom:6rem; max-width:1160px; margin:0 auto;
+  padding-left:2.75rem; padding-right:2.75rem; background:transparent !important; }}
 
 /* persistent left nav, never collapses, fixed width */
 [data-testid="stSidebar"] {{ min-width:264px !important; max-width:264px !important; }}
@@ -56,43 +56,49 @@ html, body, [class*="css"], .stMarkdown, p, span, div, label, li {{
   font-family:'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   color:{BODY}; -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
 }}
-.stMarkdown p, .stMarkdown li {{ font-size:14px; line-height:1.62; }}
-/* ---- type scale (consistent H1/H2/H3/H4 across the app) ---- */
-h1,h2,h3,h4 {{ color:{INK}; font-weight:700; }}
-.main h1 {{ font-size:28px; font-weight:800; letter-spacing:-.025em; line-height:1.15; margin:.2rem 0 .6rem; }}
-.main h2 {{ font-size:20px; font-weight:700; letter-spacing:-.015em; margin:1.1rem 0 .5rem; }}
-.main h3 {{ font-size:15.5px; font-weight:700; letter-spacing:-.01em; margin:.9rem 0 .4rem; }}
-.main h4 {{ font-size:12.5px; font-weight:700; letter-spacing:.4px; text-transform:uppercase;
-  color:{MUTED}; margin:.6rem 0 .3rem; }}
+.stMarkdown p, .stMarkdown li {{ font-size:14.5px; line-height:1.65; }}
+/* ---- type scale (consistent H1/H2/H3/H4 across the app), Sora display face ---- */
+h1,h2,h3,h4,.cs-hero .h,.cs-header .cs-title,.cs-steph {{
+  font-family:'Sora','Inter',-apple-system,sans-serif; color:{INK}; font-weight:700; }}
+.main h1 {{ font-size:29px; font-weight:800; letter-spacing:-.03em; line-height:1.14; margin:.3rem 0 .7rem; }}
+.main h2 {{ font-size:20.5px; font-weight:700; letter-spacing:-.02em; margin:1.5rem 0 .6rem; }}
+.main h3 {{ font-size:16px; font-weight:700; letter-spacing:-.01em; margin:1.15rem 0 .45rem; }}
+.main h4 {{ font-size:12.5px; font-weight:700; letter-spacing:.5px; text-transform:uppercase;
+  color:{MUTED}; margin:.7rem 0 .3rem; }}
 a {{ color:{ACCENT}; text-decoration:none; }}
 a:hover {{ text-decoration:underline; }}
 ::selection {{ background:{ACCENT_SOFT}; }}
 hr {{ border:none !important; border-top:1px solid {LINE} !important; margin:1.15rem 0 !important; }}
-/* tighten Streamlit's default vertical gaps for a calmer, less-cluttered rhythm */
-[data-testid="stVerticalBlock"] {{ gap:.75rem; }}
+/* generous, calm vertical rhythm - breathing room between blocks */
+[data-testid="stVerticalBlock"] {{ gap:1rem; }}
 [data-testid="stCaptionContainer"], .stCaption {{ color:{MUTED} !important; }}
 [data-testid="stCaptionContainer"] p {{ font-size:12.5px !important; line-height:1.55 !important; color:{MUTED} !important; }}
 
 /* ============================ header ============================ */
-.cs-header {{ background:{CARD}; border:1px solid {LINE}; border-radius:14px;
-  padding:15px 20px; margin-bottom:16px;
-  box-shadow:0 1px 2px rgba(15,23,42,.03), 0 1px 1px rgba(15,23,42,.02); }}
-.cs-header .cs-row {{ display:flex; align-items:center; gap:11px; }}
-.cs-mark {{ width:32px; height:32px; border-radius:9px;
-  background:linear-gradient(135deg,{INK},#1E293B); color:#fff;
-  display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px;
-  letter-spacing:.5px; flex:0 0 32px; box-shadow:0 1px 2px rgba(15,23,42,.18); }}
-.cs-header .cs-title {{ font-size:23px; font-weight:800; color:{INK}; letter-spacing:-.025em;
+.cs-header {{ position:relative; background:
+    linear-gradient(180deg,#FFFFFF 0%,#FDFDFF 100%); border:1px solid {LINE}; border-radius:16px;
+  padding:18px 22px; margin-bottom:22px; overflow:hidden;
+  box-shadow:0 4px 20px rgba(15,23,42,.05), 0 1px 2px rgba(15,23,42,.03); }}
+.cs-header::before {{ content:""; position:absolute; left:0; top:0; bottom:0; width:4px;
+  background:linear-gradient(180deg,{ACCENT},{ACCENT_DK}); }}
+.cs-header .cs-row {{ display:flex; align-items:center; gap:13px; }}
+.cs-mark {{ width:38px; height:38px; border-radius:11px;
+  background:linear-gradient(135deg,{ACCENT},{ACCENT_DK}); color:#fff;
+  display:flex; align-items:center; justify-content:center; font-weight:800; font-size:17px;
+  letter-spacing:.5px; flex:0 0 38px; box-shadow:0 4px 12px rgba(91,91,214,.4);
+  font-family:'Sora','Inter',sans-serif; }}
+.cs-header .cs-title {{ font-size:22px; font-weight:800; color:{INK}; letter-spacing:-.03em;
   line-height:1.1; margin:0; }}
 .cs-header .cs-tag {{ font-size:12.5px; color:{MUTED}; margin-top:3px; }}
-.cs-chips {{ margin-top:12px; padding-top:12px; border-top:1px solid {LINE2};
-  display:flex; flex-wrap:wrap; gap:6px; }}
-.cs-chip {{ display:inline-flex; align-items:center; gap:6px; font-size:11px; font-weight:500;
-  color:{BODY}; background:{CARD}; border:1px solid {LINE}; padding:3px 9px; border-radius:7px;
-  white-space:nowrap; }}
-.cs-chip .k {{ color:{FAINT}; font-weight:600; text-transform:uppercase; font-size:9px; letter-spacing:.6px; }}
-.cs-chip .v {{ color:{INK}; font-weight:600; }}
-.cs-chips-empty {{ font-size:11.5px; color:{FAINT}; margin-top:12px; padding-top:12px; border-top:1px solid {LINE2}; }}
+.cs-chips {{ margin-top:14px; padding-top:14px; border-top:1px solid {LINE2};
+  display:flex; flex-wrap:wrap; gap:8px; }}
+.cs-chip {{ display:inline-flex; align-items:center; gap:7px; font-size:12px;
+  color:{BODY}; background:{PANEL}; border:1px solid {LINE}; padding:5px 12px; border-radius:9px;
+  white-space:nowrap; transition:border-color .12s ease; }}
+.cs-chip:hover {{ border-color:{ACCENT}; }}
+.cs-chip .k {{ color:{FAINT}; font-weight:700; text-transform:uppercase; font-size:9px; letter-spacing:.7px; }}
+.cs-chip .v {{ color:{INK}; font-weight:650; font-size:12px; }}
+.cs-chips-empty {{ font-size:12px; color:{FAINT}; margin-top:14px; padding-top:14px; border-top:1px solid {LINE2}; }}
 
 /* ============================ step heading ============================ */
 .cs-stepk {{ font-size:10.5px; font-weight:700; letter-spacing:1.3px; text-transform:uppercase;
@@ -142,14 +148,15 @@ hr {{ border:none !important; border-top:1px solid {LINE} !important; margin:1.1
 .cs-brand-sub {{ font-size:9.5px; color:{NAV_MUT} !important; margin:4px 0 20px 40px; text-transform:uppercase;
   letter-spacing:.9px; font-weight:600; }}
 /* vertical stepper with a connecting spine */
-.cs-step {{ display:flex; align-items:center; gap:12px; padding:7px 10px; border-radius:10px; margin:1px 0;
+.cs-step {{ display:flex; align-items:center; gap:12px; padding:9px 11px; border-radius:10px; margin:3px 0;
   position:relative; transition:background .12s ease; }}
+.cs-step:hover:not(.now) {{ background:rgba(255,255,255,.03); }}
 .cs-step .n {{ width:22px; height:22px; border-radius:50%; display:flex; align-items:center;
   justify-content:center; font-size:10.5px; font-weight:700; flex:0 0 22px; position:relative; z-index:1;
   background:{NAV2}; color:{NAV_MUT}; border:1px solid {NAV_LINE}; transition:all .15s ease; }}
 /* the spine: a segment dropping from each dot to the next */
 .cs-step:not(:last-child) .n::after {{ content:""; position:absolute; top:100%; left:50%;
-  transform:translateX(-50%); width:2px; height:15px; background:{NAV_LINE}; }}
+  transform:translateX(-50%); width:2px; height:26px; background:{NAV_LINE}; }}
 .cs-step.done .n::after {{ background:{ACCENT}; opacity:.55; }}
 .cs-step .lbl {{ font-size:12.5px; color:{NAV_MUT}; letter-spacing:-.005em; }}
 .cs-step.done .n {{ background:{ACCENT}; color:#fff; border-color:{ACCENT}; }}
@@ -196,11 +203,12 @@ hr {{ border:none !important; border-top:1px solid {LINE} !important; margin:1.1
   outline:none !important; box-shadow:0 0 0 3px {ACCENT_SOFT} !important; border-color:{ACCENT} !important; }}
 .stButton > button[kind="primary"], .stDownloadButton > button[kind="primary"],
 [data-testid="stBaseButton-primary"] {{
-  background:{INK} !important; color:#fff !important; border:1px solid {INK} !important;
-  box-shadow:0 1px 2px rgba(15,23,42,.18) !important; }}
+  background:linear-gradient(135deg,{ACCENT},{ACCENT_DK}) !important; color:#fff !important;
+  border:1px solid {ACCENT_DK} !important; font-weight:650 !important;
+  box-shadow:0 2px 8px rgba(91,91,214,.28) !important; }}
 .stButton > button[kind="primary"]:hover, [data-testid="stBaseButton-primary"]:hover {{
-  background:#1E293B !important; color:#fff !important;
-  box-shadow:0 3px 8px rgba(15,23,42,.2) !important; }}
+  background:linear-gradient(135deg,#6A6AE0,{ACCENT}) !important; color:#fff !important;
+  box-shadow:0 4px 14px rgba(91,91,214,.38) !important; transform:translateY(-1px) !important; }}
 .stButton > button:disabled, [data-testid="stBaseButton-primary"]:disabled,
 [data-testid="stBaseButton-secondary"]:disabled {{
   background:{PANEL} !important; color:{FAINT} !important; border:1px solid {LINE} !important;
@@ -263,8 +271,12 @@ div[data-testid="stExpander"] summary {{ padding:12px 16px !important; }}
 div[data-testid="stExpander"] summary:hover {{ background:{PANEL} !important; }}
 div[data-testid="stExpander"] summary p, div[data-testid="stExpander"] summary span {{
   font-weight:600 !important; color:{INK} !important; font-size:13.5px !important; }}
-[data-testid="stAlert"] {{ border-radius:11px; border:1px solid {LINE}; box-shadow:0 1px 2px rgba(15,23,42,.03); }}
-[data-testid="stAlert"] p {{ font-size:13px !important; }}
+/* alerts: prominent + well-padded so errors/success read at a glance
+   (Streamlit tints the background per kind - red/amber/green/blue - we keep that
+   and add generous padding, a rounded shape, and readable text) */
+[data-testid="stAlert"] {{ border-radius:12px !important; padding:13px 17px !important;
+  box-shadow:0 1px 3px rgba(15,23,42,.06) !important; }}
+[data-testid="stAlert"] p {{ font-size:13.5px !important; line-height:1.55 !important; font-weight:500 !important; }}
 /* container cards (st.container(border=True)), soften */
 [data-testid="stVerticalBlockBorderWrapper"] {{ border-radius:12px !important; }}
 hr {{ border-color:{LINE} !important; }}
