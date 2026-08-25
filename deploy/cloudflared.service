@@ -1,0 +1,24 @@
+# systemd unit for a Cloudflare NAMED tunnel (stable public URL) in front of Project Kairos.
+# Use this once you've created a named tunnel + config (see HOSTING.md → "Stable public URL").
+#
+# Install:
+#   sudo cp deploy/cloudflared.service /etc/systemd/system/cloudflared-kairos.service
+#   sudo systemctl daemon-reload && sudo systemctl enable --now cloudflared-kairos
+#   journalctl -u cloudflared-kairos -f
+
+[Unit]
+Description=Cloudflare Tunnel for Project Kairos
+After=network-online.target kairos.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=CHANGEME_user
+# 'kairos' = the named tunnel you created with `cloudflared tunnel create kairos`.
+# cloudflared reads ~/.cloudflared/config.yml (ingress → http://127.0.0.1:8501).
+ExecStart=/usr/local/bin/cloudflared tunnel run kairos
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

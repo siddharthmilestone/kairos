@@ -1,19 +1,25 @@
-# Hosting Project Kairos for your team (internal server)
+# Hosting Project Kairos — a public URL, laptop-off, with Odin intact
 
 This runs the **full** app — Odin memory‑graph grounding **and** the Claude CLI — on one
-machine you control, and shares an internal link with teammates on the same network.
+**always‑on machine you control**, and exposes it at a **public URL anyone can open**, even
+when your laptop is off, via a **Cloudflare Tunnel**.
 
-> Why not Streamlit Community Cloud? Odin is an internal CLI with device‑code auth and the
-> app generates through your local `claude` login. Neither exists on Streamlit's public
-> servers, so a cloud deploy would lose Odin (the core value). Self‑hosting keeps everything.
+> Why this shape? Odin is an internal CLI (device‑code auth to an internal backend) and the
+> app generates through your local `claude` login. Neither can run on public cloud (Streamlit
+> Cloud, Render, …). So the app runs on an always‑on host *inside* your network, and a tunnel
+> gives it a public address — you keep Odin **and** get a public link.
+
+The setup is two layers: **(1)** get the app running on an always‑on host, then **(2)** put a
+Cloudflare Tunnel in front for the public URL.
 
 ---
 
-## 1. Pick the host machine
+## 1. Pick the always‑on host
 
-Any always‑on Mac or Linux box on your office network (or a VM/VPN teammates can reach).
-Everyone who opens the link uses **that machine's** Odin + Claude logins, so log in once,
-there, as the user that will run the app.
+**Not your laptop** — a machine that stays on: a spare Mac/Linux box, a Mac mini, or an
+internal VM. It must be able to run `odin` and `claude` (i.e. on/through Milestone's network).
+Everyone who opens the public link uses **that machine's** Odin + Claude logins, so log in
+once, there, as the user that will run the app.
 
 ## 2. One‑time setup on the host
 
@@ -54,32 +60,90 @@ If you don't set one, the app is open to anyone who can reach the link.
 PORT=9000 ./run_server.sh
 ```
 
-The script prints the shareable link, e.g. `http://10.0.12.34:8501`. Send that to your team
-(they must be on the same network / VPN). `localhost` only works on the host itself.
+This confirms the app itself works on the host. `localhost:8501` works on the host; the
+**public** URL comes from the tunnel in the next step (no firewall/port‑forwarding needed).
 
-**Firewall:** allow inbound TCP on the port (8501) on the host. On macOS you may get a
-"accept incoming connections" prompt the first time — allow it.
+---
 
-## 5. Keep it running
+## 5. Make it public with a Cloudflare Tunnel
 
-- **Quick (Mac/Linux):** run inside `tmux` or `screen` so it survives your SSH session:
+The tunnel dials **out** from the host to Cloudflare and serves the app at a public `https`
+URL — no open inbound ports, no router config, works behind NAT/VPN.
+
+### Install `cloudflared`
+- **mac:** `brew install cloudflared`
+- **linux (Debian/Ubuntu):**
   ```bash
-  tmux new -s kairos './run_server.sh'   # detach with Ctrl-b then d; reattach: tmux attach -t kairos
-  ```
-- **Linux service (auto‑restart + start on boot):** edit paths/user in
-  [`deploy/kairos.service`](deploy/kairos.service), then:
-  ```bash
-  sudo cp deploy/kairos.service /etc/systemd/system/kairos.service
-  sudo systemctl daemon-reload && sudo systemctl enable --now kairos
-  journalctl -u kairos -f      # live logs
+  curl -L https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 \
+    -o /usr/local/bin/cloudflared && chmod +x /usr/local/bin/cloudflared
   ```
 
-## 6. Updating
+### Option A — instant public URL (Quick Tunnel, no account)
+```bash
+export KAIROS_APP_PASSWORD="choose-a-passcode"   # REQUIRED: the link is public
+./run_public.sh
+```
+It starts the app and prints a public `https://<random>.trycloudflare.com` link — share it
+with anyone. Works with your laptop off (it runs on this host). **Caveat:** the URL changes
+every restart, and Quick Tunnels are best‑effort (fine for demos/sharing, not an SLA).
+
+### Option B — stable custom URL (Named Tunnel, needs a Cloudflare account + a domain)
+Gives a permanent URL like `https://kairos.yourcompany.com` that survives restarts, and lets
+you add real sign‑in (below). One‑time:
+```bash
+cloudflared tunnel login                         # opens a browser; pick your Cloudflare domain
+cloudflared tunnel create kairos                 # creates the tunnel + a credentials file
+cloudflared tunnel route dns kairos kairos.yourcompany.com
+```
+Create `~/.cloudflared/config.yml`:
+```yaml
+tunnel: kairos
+credentials-file: /home/<user>/.cloudflared/<TUNNEL-ID>.json
+ingress:
+  - hostname: kairos.yourcompany.com
+    service: http://127.0.0.1:8501
+  - service: http_status:404
+```
+Run it (and keep it alive as a service — see step 6):
+```bash
+cloudflared tunnel run kairos
+```
+
+### Lock it down (do this — it's public now)
+- **Always** set `KAIROS_APP_PASSWORD` (the app's built‑in gate).
+- **Better (Named Tunnel):** put **Cloudflare Access** (Zero Trust, free up to 50 users) in
+  front of `kairos.yourcompany.com` — email OTP or SSO (Google/Entra), so only approved people
+  reach the app at all. Cloudflare dashboard → Zero Trust → Access → Applications.
+- Everyone shares the host's single Odin + Claude session, so anyone with access can generate
+  under those credentials — keep the audience controlled.
+
+## 6. Keep it running 24/7 (so the public URL is always up)
+
+- **Quick (Mac/Linux):** run each in its own `tmux`/`screen` so they survive your SSH session:
+  ```bash
+  tmux new -s kairos  './run_public.sh'   # app + Quick Tunnel together
+  # (detach: Ctrl-b then d · reattach: tmux attach -t kairos)
+  ```
+- **Linux services (auto‑restart + start on boot) — recommended for a stable URL:** edit the
+  paths/user in the two unit files, then install both:
+  ```bash
+  # 1) the app
+  sudo cp deploy/kairos.service     /etc/systemd/system/kairos.service
+  # 2) the named tunnel (Option B)
+  sudo cp deploy/cloudflared.service /etc/systemd/system/cloudflared-kairos.service
+  sudo systemctl daemon-reload
+  sudo systemctl enable --now kairos cloudflared-kairos
+  journalctl -u kairos -u cloudflared-kairos -f   # live logs
+  ```
+  The app listens on `127.0.0.1:8501`; the tunnel serves it publicly. Both restart on crash and
+  start on boot, so the public URL stays up without anyone logged in.
+
+## 7. Updating
 
 ```bash
 git pull                                   # or re-copy the folder
 .venv/bin/pip install -r requirements.txt  # if deps changed
-# restart: Ctrl-C then ./run_server.sh   (or: sudo systemctl restart kairos)
+sudo systemctl restart kairos              # (tunnel keeps running)
 ```
 
 ---
