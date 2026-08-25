@@ -868,7 +868,7 @@ def _pref_picker(kind: str, items: list[dict]):
     else:
         it = items[names.index(choice)]
         _apply_pref(kind, it["name"], it.get(text_key, ""))
-        with st.container(border=True, key=f"cstile_pref_{kind}"):
+        with st.container(border=False):
             if it.get("summary"):
                 st.markdown(f"<div class='cs-prefsum'>{_esc_html(it['summary'])}</div>",
                             unsafe_allow_html=True)

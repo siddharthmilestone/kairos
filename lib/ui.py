@@ -506,13 +506,6 @@ hr {{ border-color:{LINE} !important; }}
 /* dividers: pure spacing, no rule */
 hr {{ border:none !important; background:transparent !important; height:0 !important; margin:16px 0 !important; }}
 
-/* ================= OPT-IN BORDERED TILES (st.container(border=True, key="cstile_*")) ================= */
-/* Streamlit puts the key class on the inner stVerticalBlock; the border wrapper is its parent.
-   Target that wrapper so these specific containers become nice bordered cards (like the reasoning
-   aside), overriding the global borderless pass. */
-[data-testid="stVerticalBlockBorderWrapper"]:has([class*="st-key-cstile"]) {{
-  border:1px solid {LINE} !important; background:{CARD} !important;
-  border-radius:14px !important; box-shadow:0 1px 2px rgba(16,24,40,.04) !important; }}
 </style>
 """
 
