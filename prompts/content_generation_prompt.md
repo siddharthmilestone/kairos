@@ -48,9 +48,16 @@ Brand: {brand_name}
 Brand Voice: {brand_voice}
 Call To Action: {cta}
 Output Language: {output_language}
+Author (E-E-A-T): {eeat_author}
+Target depth: {depth_target}
 
 ## STRATEGIC FIT (write toward every one of these — they are why this topic was chosen)
 {strategic_fit}
+{multi_property}
+
+{brand_safety}
+
+{internal_links}
 
 Align the whole piece to the **business objective** above; frame it for a guest at the stated **guest-journey stage** (match their mindset and next action for that phase); feature the listed **hotel features** where grounded; and fill the stated **content gap** for the stated **search intent**.
 
@@ -177,11 +184,16 @@ The finished, **paste-it-straight-onto-the-website** {article_type} — written 
 ## PART B — CONTENT OPERATIONS PACK
 Publisher-facing guidance. Wrap between:
 <<<OPS_PACK_START>>>
-1. Meta Information — Meta Title, Meta Description, URL Slug
-2. Schema Recommendations (Schema.org types)
-3. Internal Link Recommendations (descriptive anchor text, from metadata JSON)
+1. Meta Information — Meta Title (≤60 chars), Meta Description (≤155 chars), URL Slug
+2. Schema Recommendations — name the Schema.org types that fit this piece (Article/BlogPosting,
+   FAQPage, HowTo, LocalBusiness/LodgingBusiness, BreadcrumbList). The app auto-generates the actual
+   JSON-LD, so here just confirm the types and note any extra properties worth adding.
+3. Internal Link Recommendations — descriptive anchor text mapped to a REAL target URL. If an
+   "INTERNAL LINKING" list of the site's real URLs is provided above, choose from THOSE exact URLs;
+   never invent a path. 3-6 links.
 4. External Citation Recommendations (authoritative sources; do not invent URLs)
-5. Image Recommendations (placements, descriptions, alt text, filenames, captions)
+5. Image Recommendations — for EACH: placement (which section), subject/description, descriptive
+   alt text (grounded, specific), suggested filename (kebab-case), and a caption. 3-6 images.
 6. Social Media Assets (LinkedIn, X, Facebook, email excerpt, 50-word + 150-word summaries)
 <<<OPS_PACK_END>>>
 

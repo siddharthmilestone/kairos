@@ -58,8 +58,8 @@ choices in the context. Do NOT browse the web.
 {grounding}
 
 # TASK
-Produce EXACTLY 4 distinct BRAND VOICES and EXACTLY 4 distinct GUEST PERSONAS this business could
-credibly use, all grounded in the context.
+Produce EXACTLY 4 distinct BRAND VOICES, EXACTLY 4 distinct GUEST PERSONAS, ONE editorial AUTHOR
+profile (for E-E-A-T), and a BRAND-SAFETY block — all grounded in the context.
 
 - **Brand voices** — four different but on-brand tones the brand could genuinely adopt (e.g. refined
   concierge, warm storyteller, authoritative expert, understated luxe — but choose what fits THIS
@@ -73,6 +73,18 @@ credibly use, all grounded in the context.
   target (who they are, age range, motivations, what they value most, likely objections, decision
   stage, and the tone that resonates with them). Make the four genuinely distinct.
 
+- **Author (E-E-A-T)** — a credible editorial author this brand would publish under. Prefer a real
+  team/role identity over a fabricated person (e.g. "{business_name} Editorial Team", "The Concierge
+  Desk", a named expert role). Provide `name`, `title` (role), and a 1-2 sentence `bio` establishing
+  genuine, grounded expertise (years serving guests, on-property knowledge). Do NOT invent a real
+  person's name, credentials, or awards.
+
+- **Brand safety** — `restricted_terms`: 4-10 words/phrases this brand should NOT use in content
+  (unsupported superlatives, regulated/overclaiming language, and — if any competitors appear in the
+  grounding — competitor brand names). `required_disclaimers`: 0-3 short disclaimers the brand must
+  include when relevant (e.g. rate/availability caveats), or an empty list. Ground these; do not invent
+  legal claims.
+
 Terse, grounded, no filler.
 
 # OUTPUT — JSON only, between the fences, nothing outside them
@@ -82,7 +94,10 @@ Terse, grounded, no filler.
  ],
  "personas": [
   {{"name": "...", "summary": "one line", "persona": "rich, targetable audience description"}}
- ]}}
+ ],
+ "author": {{"name": "...", "title": "...", "bio": "1-2 sentences of grounded expertise"}},
+ "brand_safety": {{"restricted_terms": ["..."], "required_disclaimers": ["..."]}}
+}}
 <<<PREFS_JSON_END>>>
 """
 
@@ -103,6 +118,21 @@ def _parse(out: str) -> dict:
         except Exception:
             continue
     raise ValueError(f"Could not parse the preferences JSON. Response began: {out[:200]!r}")
+
+
+def _clean_author(a: Any, business_name: str) -> dict:
+    a = a if isinstance(a, dict) else {}
+    name = (a.get("name") or "").strip() or f"{business_name} Editorial Team"
+    return {"name": name, "title": (a.get("title") or "Editorial Team").strip(),
+            "bio": (a.get("bio") or "").strip()}
+
+
+def _clean_brand_safety(b: Any) -> dict:
+    b = b if isinstance(b, dict) else {}
+    def _list(x):
+        return [s.strip() for s in x if isinstance(s, str) and s.strip()] if isinstance(x, list) else []
+    return {"restricted_terms": _list(b.get("restricted_terms"))[:12],
+            "required_disclaimers": _list(b.get("required_disclaimers"))[:5]}
 
 
 def _clean(items: Any, text_key: str) -> list[dict]:
@@ -128,4 +158,6 @@ def generate_preferences(*, business_name: str, grounding_bundle: dict[str, Any]
     personas = _clean(data.get("personas"), "persona")[:4]
     if not voices and not personas:
         raise ValueError("No brand voices or personas were generated.")
-    return {"brand_voices": voices, "personas": personas}
+    return {"brand_voices": voices, "personas": personas,
+            "author": _clean_author(data.get("author"), business_name),
+            "brand_safety": _clean_brand_safety(data.get("brand_safety"))}

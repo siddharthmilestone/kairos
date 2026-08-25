@@ -494,6 +494,79 @@ def _enhancements_block(enh: list[dict[str, Any]] | None) -> str:
     return "\n".join(lines)
 
 
+def _depth_target_line(article_type: str) -> str:
+    t = taxonomy.format_target(article_type)
+    lo, ideal, hi = t["words"]
+    return (f"aim for roughly {ideal} words (acceptable {lo}-{hi}). Depth must come from substance "
+            "— real specifics, not padding. Never inflate to hit a count.")
+
+
+def _eeat_author_line(author: dict[str, Any] | None) -> str:
+    a = author or {}
+    name = (a.get("name") or "").strip()
+    if not name:
+        return "(publish under the brand's editorial identity; write with demonstrable first-hand expertise)"
+    bits = [name]
+    if a.get("title"):
+        bits.append(a["title"])
+    line = " — ".join(bits).replace(" — ", ", ")
+    if a.get("bio"):
+        line += f". {a['bio'].strip()}"
+    return (line + " Write in this author's credible, experienced voice (E-E-A-T): show first-hand "
+            "knowledge, name specifics, and distinguish verified fact from informed judgment.")
+
+
+def _brand_safety_block(bs: dict[str, Any] | None) -> str:
+    bs = bs or {}
+    rt = [t for t in (bs.get("restricted_terms") or []) if t]
+    dis = [d for d in (bs.get("required_disclaimers") or []) if d]
+    if not rt and not dis:
+        return ""
+    lines = ["# BRAND SAFETY (HARD — the draft must comply)"]
+    if rt:
+        lines.append("- **Never use these restricted terms/phrases:** " + "; ".join(rt) + ".")
+    if dis:
+        lines.append("- **Include these disclaimers where relevant:** " + " / ".join(dis) + ".")
+    return "\n".join(lines)
+
+
+def _internal_links_block(internal_links: list[dict[str, Any]] | list[str] | None) -> str:
+    links = internal_links or []
+    if not links:
+        return ""
+    rows = []
+    for l in links[:24]:
+        if isinstance(l, dict):
+            url = l.get("url") or l.get("loc") or ""
+            title = l.get("title") or l.get("name") or ""
+        else:
+            url, title = str(l), ""
+        if url:
+            rows.append(f"- {url}" + (f"  ({title})" if title else ""))
+    if not rows:
+        return ""
+    return ("# INTERNAL LINKING (the site's REAL URLs — use ONLY these for internal-link "
+            "recommendations in PART B; never invent a path)\n" + "\n".join(rows))
+
+
+def _multi_property_line(bundle: dict[str, Any]) -> str:
+    """If the grounding names more than one property/location, force per-fact disambiguation."""
+    if is_llm_bundle(bundle):
+        return ""
+    props = []
+    for key in ("property", "hotel", "location", "brand", "resort"):
+        for r in (bundle.get(key) or []):
+            if isinstance(r, dict) and r.get("name"):
+                props.append(r["name"])
+    props = sorted(set(props))
+    if len(props) < 2:
+        return ""
+    return ("\n**MULTI-PROPERTY — disambiguate every fact.** The grounding covers more than one "
+            "property/location (" + ", ".join(props[:6]) + (", …" if len(props) > 6 else "") + "). "
+            "Name the SPECIFIC property each fact belongs to; never blend amenities, rates, or policies "
+            "across properties, and never attribute one property's feature to another.")
+
+
 def build_prompt(opp: dict, *, mode: str = "create", brand_name: str, brand_voice: str,
                  article_type: str, target_audience: str, cta: str, topic_qa: str,
                  output_language: str, grounding_bundle: dict[str, Any],
@@ -501,7 +574,10 @@ def build_prompt(opp: dict, *, mode: str = "create", brand_name: str, brand_voic
                  optimization_plan: str = "",
                  fanout_queries: list[dict[str, Any]] | None = None,
                  applied_enhancements: list[dict[str, Any]] | None = None,
-                 artifact_brief: str = "") -> str:
+                 artifact_brief: str = "",
+                 author: dict[str, Any] | None = None,
+                 brand_safety: dict[str, Any] | None = None,
+                 internal_links: list[dict[str, Any]] | None = None) -> str:
     template = TEMPLATE.read_text()
     is_optimize = mode == "optimize"
     keywords = opp.get("keywords") or []
@@ -563,6 +639,11 @@ def build_prompt(opp: dict, *, mode: str = "create", brand_name: str, brand_voic
             f"{', '.join(opp.get('hotel_features') or []) or '—'}\n"
             f"- **Content gap** being filled: {opp.get('content_gap_type') or '—'} · "
             f"**search intent**: {opp.get('intent') or 'Informational'}"),
+        "{eeat_author}": _eeat_author_line(author),
+        "{depth_target}": _depth_target_line(article_type),
+        "{multi_property}": _multi_property_line(grounding_bundle),
+        "{brand_safety}": _brand_safety_block(brand_safety),
+        "{internal_links}": _internal_links_block(internal_links),
         "{author_answers_block}": _author_answers_block(topic_qa),
         "{fanout_queries}": _fanout_block(fanout_queries, is_optimize),
         "{applied_enhancements}": _enhancements_block(applied_enhancements),

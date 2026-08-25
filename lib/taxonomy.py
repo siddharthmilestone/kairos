@@ -54,6 +54,38 @@ HOTEL_FEATURES = [
     "Golf", "All-Inclusive Program", "Fitness & Wellbeing", "Sustainability",
 ]
 
+# --- Per-format depth targets + FAQ policy. Drives (a) the depth target injected into the
+#     generation prompt and (b) the deterministic pre-flight gates. (min, ideal, max) words.
+#     `faq` = whether a well-built piece of this format should carry an FAQ block. Keys are
+#     lower-cased article types. ---
+FORMAT_TARGETS = {
+    "blog article":       {"words": (700, 1100, 1600), "faq": True,  "long_form": True},
+    "how-to guide":       {"words": (800, 1300, 2000), "faq": True,  "long_form": True},
+    "comparison article": {"words": (800, 1200, 1800), "faq": True,  "long_form": True},
+    "listicle":           {"words": (700, 1100, 1700), "faq": True,  "long_form": True},
+    "landing page":       {"words": (450, 750, 1100),  "faq": True,  "long_form": True},
+    "pillar page":        {"words": (1200, 2000, 3200), "faq": True, "long_form": True},
+    "thought leadership": {"words": (800, 1200, 1800), "faq": True,  "long_form": True},
+    "newsletter":         {"words": (300, 550, 850),   "faq": False, "long_form": False},
+    "press release":      {"words": (350, 550, 800),   "faq": False, "long_form": False},
+    "press release calendar": {"words": (350, 550, 800), "faq": False, "long_form": False},
+    "news article":       {"words": (350, 600, 900),   "faq": False, "long_form": False},
+    "web page":           {"words": (500, 850, 1300),  "faq": True,  "long_form": True},
+}
+_DEFAULT_TARGET = {"words": (600, 1000, 1600), "faq": True, "long_form": True}
+
+
+def format_target(article_type: str) -> dict:
+    return FORMAT_TARGETS.get((article_type or "").strip().lower(), _DEFAULT_TARGET)
+
+
+def faq_expected(article_type: str) -> bool:
+    return bool(format_target(article_type).get("faq"))
+
+
+def is_long_form(article_type: str) -> bool:
+    return bool(format_target(article_type).get("long_form"))
+
 # --- 1 · The canonical 10 hospitality business objectives (fixed framework; every
 #         topic maps to exactly one). NOT fetched from Odin — Odin informs which are
 #         relevant, but the objective vocabulary is this predefined set. ---
