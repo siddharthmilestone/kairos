@@ -21,6 +21,41 @@ from lib import (artifacts, blockval, briefqa, cache, crawl, docs, enhance, fact
 st.set_page_config(page_title="Project Kairos", page_icon="", layout="wide")
 ui.inject_css()
 
+
+def _require_passcode():
+    """Optional shared-link access gate for self-hosting. If KAIROS_APP_PASSWORD is set
+    (env var or .streamlit/secrets.toml), visitors must enter it before using the app.
+    If it is not set, the app is open (no gate). This is an app-level passcode set by the
+    host, not a user credential."""
+    import os as _os
+    pw = _os.environ.get("KAIROS_APP_PASSWORD")
+    if not pw:
+        try:
+            pw = st.secrets.get("KAIROS_APP_PASSWORD")  # type: ignore[attr-defined]
+        except Exception:  # noqa: BLE001 — no secrets file is fine
+            pw = None
+    if not pw:
+        return  # no passcode configured → open access
+    if st.session_state.get("_authed"):
+        return
+    _, mid, _ = st.columns([1, 1.2, 1])
+    with mid:
+        st.markdown("<div style='height:14vh'></div>", unsafe_allow_html=True)
+        st.markdown("### Project Kairos")
+        st.caption("Enter the access passcode to continue.")
+        entered = st.text_input("Passcode", type="password", label_visibility="collapsed",
+                                placeholder="Access passcode")
+        if entered:
+            if entered == pw:
+                st.session_state._authed = True
+                st.rerun()
+            else:
+                st.error("Incorrect passcode.")
+    st.stop()
+
+
+_require_passcode()
+
 LANGUAGES = ["English", "Spanish", "French", "German", "Portuguese", "Italian", "Japanese"]
 FORMATS = ["Blog Article", "Newsletter", "Press Release", "Press Release Calendar",
            "How-To Guide", "Thought Leadership", "Comparison Article", "Landing Page",

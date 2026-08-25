@@ -1,13 +1,24 @@
+# Project Kairos — Streamlit server + theme config.
+# The app injects its own full CSS at runtime; the [theme] here only sets the
+# very first paint so there is no flash before the CSS loads.
+
 [theme]
 base = "light"
-primaryColor = "#B98A2E"
+primaryColor = "#2563EB"           # blue-600 (matches the app accent)
 backgroundColor = "#FFFFFF"
-secondaryBackgroundColor = "#F7F9FC"
-textColor = "#1C2B3A"
+secondaryBackgroundColor = "#F9FAFB"
+textColor = "#111827"
 font = "sans serif"
 
 [server]
 headless = true
+address = "0.0.0.0"                # listen on all interfaces so teammates on the network can reach it
+port = 8501
+enableCORS = true
+enableXsrfProtection = true
+maxUploadSize = 25
+runOnSave = false
+fileWatcherType = "none"           # production: do not watch source files
 
 [browser]
 gatherUsageStats = false

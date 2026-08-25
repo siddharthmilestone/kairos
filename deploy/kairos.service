@@ -1,0 +1,30 @@
+# systemd unit to keep Project Kairos running on a Linux server (auto-restart, start on boot).
+#
+# Install:
+#   1. Edit the paths / user / passcode below to match your server.
+#   2. sudo cp deploy/kairos.service /etc/systemd/system/kairos.service
+#   3. sudo systemctl daemon-reload && sudo systemctl enable --now kairos
+#   4. Check:  systemctl status kairos    ·    journalctl -u kairos -f
+#
+# NOTE: the service user must have the Claude CLI logged in and Odin authenticated in
+# ITS OWN home (run `claude` /login and `odin auth login` as that user once).
+
+[Unit]
+Description=Project Kairos (Streamlit)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=CHANGEME_user
+WorkingDirectory=/opt/kairos                      # CHANGEME: repo path on the server
+Environment=KAIROS_MODEL_BACKEND=cli
+Environment=PORT=8501
+# Optional shared-link passcode (uncomment + set):
+# Environment=KAIROS_APP_PASSWORD=change-me
+ExecStart=/opt/kairos/run_server.sh               # CHANGEME: repo path
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
