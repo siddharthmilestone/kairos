@@ -33,9 +33,17 @@ NAV_TXT = "#C9D0DE"   # rail text
 NAV_MUT = "#7C8598"   # rail muted
 NAV_LINE = "rgba(255,255,255,.08)"
 
+# Native, always-available premium font stacks — no network dependency (remote webfonts
+# were silently failing behind corporate networks and dropping the whole app to an ugly
+# serif fallback). On macOS this resolves to SF Pro, on Windows to Segoe UI.
+SANS = ('-apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", "Inter", Roboto, '
+        '"Helvetica Neue", Arial, sans-serif')
+DISPLAY = ('-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", "Inter", Roboto, '
+           '"Helvetica Neue", Arial, sans-serif')
+MONO = 'ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace'
+
 CSS = f"""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap');
 
 :root {{ color-scheme: light !important; }}
 html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"], .main {{
@@ -49,8 +57,8 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"], 
 #MainMenu, header[data-testid="stHeader"], footer {{ visibility:hidden; height:0; }}
 [data-testid="stToolbar"] {{ display:none; }}
 /* work canvas: capped + centered so the full app (264px rail + content) frames to ~1440 */
-.block-container {{ padding-top:2.4rem; padding-bottom:6rem; max-width:1160px; margin:0 auto;
-  padding-left:2.75rem; padding-right:2.75rem; background:transparent !important; }}
+.block-container {{ padding-top:2.6rem; padding-bottom:3rem; max-width:1180px; margin:0 auto;
+  padding-left:3rem; padding-right:3rem; background:transparent !important; }}
 
 /* persistent left nav, never collapses, fixed width */
 [data-testid="stSidebar"] {{ min-width:264px !important; max-width:264px !important; }}
@@ -58,14 +66,14 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"], 
 [data-testid="stSidebarCollapsedControl"], button[data-testid="baseButton-headerNoPadding"] {{ display:none !important; }}
 [data-testid="stSidebarResizeHandle"] {{ display:none !important; }}
 
-html, body, [class*="css"], .stMarkdown, p, span, div, label, li {{
-  font-family:'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+html, body, [class*="css"], .stMarkdown, p, span, div, label, li, input, textarea, button {{
+  font-family:{SANS};
   color:{BODY}; -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
 }}
 .stMarkdown p, .stMarkdown li {{ font-size:14.5px; line-height:1.65; }}
-/* ---- type scale (consistent H1/H2/H3/H4 across the app), Sora display face ---- */
+/* ---- type scale (consistent H1/H2/H3/H4 across the app), system display face ---- */
 h1,h2,h3,h4,.cs-hero .h,.cs-header .cs-title,.cs-steph {{
-  font-family:'Sora','Inter',-apple-system,sans-serif; color:{INK}; font-weight:700; }}
+  font-family:{DISPLAY}; color:{INK}; font-weight:700; }}
 .main h1 {{ font-size:29px; font-weight:800; letter-spacing:-.03em; line-height:1.14; margin:.3rem 0 .7rem; }}
 .main h2 {{ font-size:20.5px; font-weight:700; letter-spacing:-.02em; margin:1.5rem 0 .6rem; }}
 .main h3 {{ font-size:16px; font-weight:700; letter-spacing:-.01em; margin:1.15rem 0 .45rem; }}
@@ -94,7 +102,7 @@ hr {{ border:none !important; border-top:1px solid {LINE} !important; margin:1.1
   background:linear-gradient(135deg,{ACCENT},{ACCENT_DK}); color:#fff;
   display:flex; align-items:center; justify-content:center; font-weight:800; font-size:17px;
   letter-spacing:.5px; flex:0 0 38px; box-shadow:0 4px 12px rgba(91,91,214,.4);
-  font-family:'Sora','Inter',sans-serif; }}
+  font-family:{DISPLAY}; }}
 .cs-header .cs-title {{ font-size:22px; font-weight:800; color:{INK}; letter-spacing:-.03em;
   line-height:1.1; margin:0; }}
 .cs-header .cs-tag {{ font-size:12.5px; color:{MUTED}; margin-top:3px; }}
@@ -280,7 +288,7 @@ div[data-testid="stExpander"] summary:hover {{ background:{PANEL} !important; }}
 div[data-testid="stExpander"] summary p, div[data-testid="stExpander"] summary span {{
   font-weight:600 !important; color:{INK} !important; font-size:13.5px !important; }}
 /* FAQ section header — sets the accordion apart from body prose */
-.cs-faq-head {{ font-family:'Sora',Inter,sans-serif; font-weight:800; font-size:20.5px;
+.cs-faq-head {{ font-family:{DISPLAY}; font-weight:800; font-size:20.5px;
   color:{INK}; margin:26px 0 2px; padding-top:16px; border-top:1px solid {LINE2};
   display:flex; align-items:center; gap:10px; }}
 .cs-faq-head::before {{ content:""; width:5px; height:20px; border-radius:3px;
@@ -313,7 +321,12 @@ div[data-testid="stExpander"] summary p, div[data-testid="stExpander"] summary s
 [data-testid="stAlert"] p {{ font-size:13.5px !important; line-height:1.55 !important; font-weight:500 !important; }}
 /* container cards (st.container(border=True)) — soft, elevated, premium */
 [data-testid="stVerticalBlockBorderWrapper"] {{ border-radius:14px !important;
-  box-shadow:0 1px 2px rgba(15,23,42,.03), 0 10px 30px -18px rgba(23,27,58,.16) !important; }}
+  border-color:{LINE} !important;
+  box-shadow:0 1px 2px rgba(15,23,42,.03), 0 10px 30px -18px rgba(23,27,58,.16) !important;
+  transition:box-shadow .16s ease, transform .16s ease, border-color .16s ease !important; }}
+[data-testid="stVerticalBlockBorderWrapper"]:hover {{
+  box-shadow:0 2px 4px rgba(15,23,42,.04), 0 18px 44px -22px rgba(23,27,58,.24) !important;
+  border-color:#DADFEC !important; }}
 hr {{ border-color:{LINE} !important; }}
 .stSelectbox label, .stTextInput label, .stTextArea label, .stMultiSelect label, .stRadio label {{
   font-weight:600 !important; color:{INK} !important; }}
@@ -342,7 +355,7 @@ hr {{ border-color:{LINE} !important; }}
 .cs-ib.other {{ background:#EDF1F5; color:#334155; }}
 /* optimization-plan bucket cards */
 .cs-bucket {{ border:1px solid {LINE}; border-radius:12px; padding:14px 16px; margin-bottom:10px; }}
-.cs-bucket .bh {{ font-family:"Helvetica Neue",Arial,sans-serif; font-weight:700; font-size:13px;
+.cs-bucket .bh {{ font-family:{SANS}; font-weight:700; font-size:13px;
   letter-spacing:.4px; text-transform:uppercase; margin-bottom:6px; display:flex; align-items:center; gap:8px; }}
 .cs-bucket.retain {{ border-left:4px solid #1E6B3A; }} .cs-bucket.retain .bh {{ color:#1E6B3A; }}
 .cs-bucket.enhance {{ border-left:4px solid #8A6410; }} .cs-bucket.enhance .bh {{ color:#8A6410; }}
@@ -421,13 +434,13 @@ hr {{ border-color:{LINE} !important; }}
 .cs-prwhy b {{ color:{INK}; }}
 .cs-prg {{ font-size:11.5px; color:{BODY}; line-height:1.55; margin:3px 0; }}
 .cs-prg b {{ color:{INK}; }}
-.cs-prg .node {{ display:inline-block; font-family:"SF Mono",Menlo,monospace; font-size:10px;
+.cs-prg .node {{ display:inline-block; font-family:{MONO}; font-size:10px;
   background:{PANEL}; border:1px solid {LINE}; color:{MUTED}; border-radius:5px; padding:1px 6px; margin:2px 4px 0 0; }}
 
 /* --- landing / objective hero + option cards --- */
-.cs-hero {{ margin:2px 0 24px; }}
-.cs-hero .h {{ font-size:29px; font-weight:800; letter-spacing:-.03em; color:{INK}; margin:0 0 10px; line-height:1.12; }}
-.cs-hero .s {{ font-size:14.5px; color:{MUTED}; max-width:660px; line-height:1.62; margin:0; }}
+.cs-hero {{ margin:2px 0 26px; }}
+.cs-hero .h {{ font-size:33px; font-weight:800; letter-spacing:-.035em; color:{INK}; margin:0 0 11px; line-height:1.08; max-width:15ch; }}
+.cs-hero .s {{ font-size:15px; color:{MUTED}; max-width:600px; line-height:1.6; margin:0; }}
 .cs-opt {{ padding:6px 4px 12px; }}
 .cs-opt .iconbadge {{ width:44px; height:44px; border-radius:12px; display:flex; align-items:center;
   justify-content:center; color:{ACCENT}; background:{ACCENT_SOFT};
@@ -478,10 +491,8 @@ hr {{ border-color:{LINE} !important; }}
 .cs-tag2.accent {{ background:{ACCENT_SOFT}; border-color:#E0E2FB; color:{ACCENT}; }}
 .cs-tag2.ink {{ background:{INK}; border-color:{INK}; color:#fff; }}
 
-/* --- product footer (sticky at the bottom, spanning the content area) --- */
-.cs-footer {{ position:fixed; left:264px; right:0; bottom:0; z-index:50;
-  padding:11px 30px; border-top:1px solid {LINE}; background:rgba(255,255,255,.92);
-  backdrop-filter:saturate(1.2) blur(8px); -webkit-backdrop-filter:saturate(1.2) blur(8px);
+/* --- product footer (flows in-document at the end of content; never overlaps) --- */
+.cs-footer {{ margin:34px 0 4px; padding:16px 4px 4px; border-top:1px solid {LINE};
   display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; }}
 .cs-footer .l {{ display:flex; align-items:center; gap:9px; font-size:12.5px; color:{MUTED}; }}
 .cs-footer .l .m {{ width:20px; height:20px; border-radius:6px; background:linear-gradient(135deg,{ACCENT},#7C5CFF);
