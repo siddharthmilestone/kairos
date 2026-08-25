@@ -14,10 +14,10 @@ except Exception:  # pragma: no cover
     markdown2 = None
 
 # ---- Preline UI design tokens (Tailwind gray scale + blue-600 primary) ----
-INK = "#1F2937"       # gray-800 — headings / primary text
-BODY = "#4B5563"      # gray-600 — body text
-MUTED = "#6B7280"     # gray-500 — secondary
-FAINT = "#9CA3AF"     # gray-400 — tertiary
+INK = "#111827"       # gray-900 — headings / primary text (crisp, high contrast)
+BODY = "#374151"      # gray-700 — body text (darker for readability)
+MUTED = "#4B5563"     # gray-600 — secondary
+FAINT = "#6B7280"     # gray-500 — tertiary
 LINE = "#E5E7EB"      # gray-200 — borders
 LINE2 = "#F3F4F6"     # gray-100 — faint dividers / hover
 PANEL = "#F3F4F6"     # gray-100 — filled inputs / stronger surfaces
@@ -69,7 +69,7 @@ html, body, [class*="css"], .stMarkdown, p, span, div, label, li, input, textare
   font-family:{SANS};
   color:{BODY}; -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
 }}
-.stMarkdown p, .stMarkdown li {{ font-size:14.5px; line-height:1.65; }}
+.stMarkdown p, .stMarkdown li {{ font-size:15px; line-height:1.65; color:{BODY}; }}
 /* ---- type scale (consistent H1/H2/H3/H4 across the app), system display face ---- */
 h1,h2,h3,h4,.cs-hero .h,.cs-header .cs-title,.cs-steph {{
   font-family:{DISPLAY}; color:{INK}; font-weight:700; }}
@@ -144,24 +144,26 @@ hr {{ border:none !important; border-top:1px solid {LINE} !important; margin:1.1
 /* vertical nav (Preline app-shell): rounded item, blue-soft active, no spine clutter */
 .cs-step {{ display:flex; align-items:center; gap:11px; padding:8px 10px; border-radius:8px; margin:2px 0;
   position:relative; transition:background .12s ease; }}
-.cs-step:hover:not(.now) {{ background:{LINE2}; }}
-.cs-step .n {{ width:22px; height:22px; border-radius:50%; display:flex; align-items:center;
-  justify-content:center; font-size:10.5px; font-weight:600; flex:0 0 22px;
-  background:{PANEL}; color:{MUTED}; border:1px solid {LINE}; transition:all .15s ease; }}
-.cs-step .lbl {{ font-size:13px; color:{NAV_TXT}; letter-spacing:-.005em; }}
-.cs-step.done .n {{ background:{ACCENT_SOFT}; color:{ACCENT}; border-color:#BFDBFE; }}
-.cs-step.done .lbl {{ color:{NAV_TXT}; }}
-.cs-step.now {{ background:{ACCENT_SOFT}; }}
-.cs-step.now .n {{ background:{ACCENT}; color:#fff; border-color:{ACCENT}; }}
+.cs-step:hover:not(.now) {{ background:{SURFACE}; }}
+.cs-step .n {{ width:23px; height:23px; border-radius:50%; display:flex; align-items:center;
+  justify-content:center; font-size:11px; font-weight:600; flex:0 0 23px;
+  background:#E5E7EB; color:{FAINT}; transition:all .15s ease; }}
+.cs-step .lbl {{ font-size:13px; color:{NAV_MUT}; letter-spacing:-.005em; }}
+/* completed: solid blue circle with a white check + readable label */
+.cs-step.done .n {{ background:{ACCENT}; color:#fff; font-size:12px; }}
+.cs-step.done .lbl {{ color:{NAV_TXT}; font-weight:500; }}
+/* current: a clearly visible blue pill (blue-100 on the gray-50 rail) + blue number + bold label */
+.cs-step.now {{ background:#DBEAFE; }}
+.cs-step.now .n {{ background:{ACCENT}; color:#fff; }}
 .cs-step.now .lbl {{ color:{ACCENT_DK}; font-weight:600; }}
 
-/* ============================ reasoning widget (borderless soft panel) ============================ */
-.cs-reason {{ background:{SURFACE}; border:none; border-radius:12px;
-  padding:16px 18px; box-shadow:none; position:sticky; top:16px; }}
+/* ============================ reasoning widget (transparent aside — no grey block) ============================ */
+.cs-reason {{ background:transparent; border:none; border-radius:0;
+  padding:2px 0; box-shadow:none; position:sticky; top:16px; }}
 .cs-reason .rh {{ font-size:10.5px; font-weight:700; letter-spacing:1px; text-transform:uppercase;
   color:{FAINT}; margin-bottom:9px; display:flex; align-items:center; gap:7px; }}
 .cs-reason .rt {{ font-size:14.5px; font-weight:700; color:{INK}; margin:0 0 9px; line-height:1.3; letter-spacing:-.01em; }}
-.cs-reason .rb, .cs-reason .rb p, .cs-reason .rb li {{ font-size:12.6px; line-height:1.62; color:{BODY};
+.cs-reason .rb, .cs-reason .rb p, .cs-reason .rb li {{ font-size:13px; line-height:1.62; color:{BODY};
   hyphens:none; overflow-wrap:break-word; word-break:normal; }}
 .cs-reason .rb strong {{ color:{INK}; font-weight:600; }}
 .cs-reason .rb ul {{ margin:6px 0; padding-left:16px; }}
@@ -250,10 +252,10 @@ hr {{ border:none !important; border-top:1px solid {LINE} !important; margin:1.1
   color:{ACCENT_DK} !important; font-weight:600 !important; background:{ACCENT_SOFT} !important; }}
 .stTabs [data-baseweb="tab-highlight"], .stTabs [data-baseweb="tab-border"] {{ display:none !important; }}
 .stTabs [data-baseweb="tab-panel"] {{ padding-top:14px !important; }}
-div[data-testid="stExpander"] {{ border:none !important; border-radius:12px; margin-bottom:8px;
-  box-shadow:none !important; overflow:hidden; background:{SURFACE}; }}
-div[data-testid="stExpander"] summary {{ padding:12px 16px !important; }}
-div[data-testid="stExpander"] summary:hover {{ background:{LINE2} !important; }}
+div[data-testid="stExpander"] {{ border:none !important; border-radius:10px; margin-bottom:6px;
+  box-shadow:none !important; overflow:hidden; background:transparent; }}
+div[data-testid="stExpander"] summary {{ padding:9px 12px !important; border-radius:8px; }}
+div[data-testid="stExpander"] summary:hover {{ background:{SURFACE} !important; }}
 div[data-testid="stExpander"] summary p, div[data-testid="stExpander"] summary span {{
   font-weight:600 !important; color:{INK} !important; font-size:13.5px !important; }}
 /* FAQ section header — sets the accordion apart from body prose */
@@ -287,9 +289,10 @@ div[data-testid="stExpander"] summary p, div[data-testid="stExpander"] summary s
 [data-testid="stAlert"] {{ border-radius:10px !important; padding:12px 15px !important;
   box-shadow:none !important; }}
 [data-testid="stAlert"] p {{ font-size:13.5px !important; line-height:1.55 !important; font-weight:500 !important; }}
-/* container cards (st.container(border=True)) — BORDERLESS: soft gray-50 fill, no border, no shadow */
+/* container cards (st.container(border=True)) — fully transparent: content sits on the white
+   canvas, delineated by spacing only (no grey blocks anywhere) */
 [data-testid="stVerticalBlockBorderWrapper"] {{ border-radius:14px !important;
-  border:none !important; background:{SURFACE} !important; box-shadow:none !important; }}
+  border:none !important; background:transparent !important; box-shadow:none !important; }}
 hr {{ border-color:{LINE} !important; }}
 .stSelectbox label, .stTextInput label, .stTextArea label, .stMultiSelect label, .stRadio label {{
   font-weight:600 !important; color:{INK} !important; }}
@@ -444,7 +447,7 @@ hr {{ border-color:{LINE} !important; }}
 .cs-eyebrow {{ font-size:10.5px; font-weight:700; letter-spacing:1.1px; text-transform:uppercase;
   color:{FAINT}; margin:2px 0 8px; }}
 /* --- lede: the one-line intro under a step heading --- */
-.cs-lede {{ font-size:14.5px; color:{BODY}; line-height:1.6; margin:0 0 14px; max-width:720px; }}
+.cs-lede {{ font-size:15px; color:{BODY}; line-height:1.62; margin:0 0 14px; max-width:720px; }}
 .cs-lede b {{ color:{INK}; font-weight:600; }}
 
 /* --- standardized tag (one badge style used across the app) --- */
@@ -482,7 +485,10 @@ hr {{ border-color:{LINE} !important; }}
 /* filled surfaces stay legible on the white canvas without a border */
 [data-testid="stCode"], [data-testid="stCode"] pre, .stCode, pre, [data-testid="stJson"] {{ background:{SURFACE} !important; }}
 [data-testid="stDataFrame"], [data-testid="stFileUploaderDropzone"] {{ background:{SURFACE} !important; }}
-.cs-srctile, .cs-preftile, .cs-pickerwrap {{ background:{SURFACE} !important; box-shadow:none !important; }}
+.cs-srctile, .cs-preftile {{ background:{SURFACE} !important; box-shadow:none !important; }}
+.cs-pickerwrap {{ background:transparent !important; box-shadow:none !important; padding:0 !important; }}
+/* small inline chips need a soft fill to read on the white canvas */
+.cs-reason .rb code, .cs-pill {{ background:{SURFACE} !important; }}
 .cs-srctile.on, .cs-preftile.on {{ background:{ACCENT_SOFT} !important; box-shadow:none !important; }}
 /* secondary / sidebar buttons -> soft filled (borderless), gray-100 so they read on gray-50 cards */
 .stButton > button, .stDownloadButton > button, .stFormSubmitButton > button,
@@ -784,7 +790,7 @@ def step_rail(order: list[str], labels: dict[str, str], current: int):
             '<div class="cs-brand-sub">Content workflow</div>']
     for i, key in enumerate(order):
         cls = "done" if i < current else ("now" if i == current else "")
-        mark = "" if i < current else str(i + 1)
+        mark = "&#10003;" if i < current else str(i + 1)  # ✓ for completed steps
         rows.append(f'<div class="cs-step {cls}"><div class="n">{mark}</div>'
                     f'<div class="lbl">{labels[key]}</div></div>')
     st.sidebar.markdown("\n".join(rows), unsafe_allow_html=True)
