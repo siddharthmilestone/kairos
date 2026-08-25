@@ -111,29 +111,33 @@ Full opportunity record + business metadata (USE ALL OF IT to steer the work —
 
 --------------------------------------------------
 
-# WRITING STYLE — write like a senior content lead at one of the world's most successful brands
+# WRITING STYLE — write like a knowledgeable human expert explaining this clearly to another human
 
-- **Brand voice first:** if a Brand Voice is provided above, it governs tone and vocabulary. The rules below always apply on top of it.
-- Lead with the answer. Say the useful thing first; explain after. No throat-clearing intros.
-- Be concrete and specific — real names, numbers, and examples (grounded) over description. Show, don't praise.
-- Active voice. Vary sentence length. Confident expert register — no hedging ("might", "arguably"), no hype.
-- **Do NOT stack adjectives** ("stunning, luxurious, world-class, unforgettable"). Use at most one, and only when it carries real information.
-- **Banned openers, closers, and headings:** never use "In conclusion", "In summary", "To summarize", "Summarizing", "In today's … world", "When it comes to", "Unlock", "Elevate", "Nestled", "Whether you're …". End on a substantive point or a concrete next step — never a summary heading.
-- Don't lean on filler transitions ("Moreover", "Furthermore", "Additionally"); connect ideas by logic.
-- **Never use em dashes (—).** Rewrite with a colon, a comma, parentheses, or two sentences instead.
-- Readability grade 8–10 — clear, never dumbed-down or generic.
-- **NO citation markup in the content.** PART A is finished, copy-paste-ready reader content. Never print bracketed tokens of any kind — `[graph:...]`, `[graph:author-first-party-N]`, `[web:...]`, `[not available in provided context]`, `[to verify]`, `[to source]`, node ids, or footnote markers. If a fact isn't grounded, simply leave it out and note it in PART C instead. A reader must be able to paste PART A straight onto the site with zero cleanup.
+**PRIMARY PRINCIPLE: write for humans first.** AI engines and search should cite this because it is genuinely useful, specific, and clear — never because it was optimized. Never sacrifice usefulness or clarity to satisfy an SEO rule. Do NOT manufacture keyword density, repeat phrases, add sections, or add words to hit a length. **Every sentence must earn its place** — if a sentence can be removed without reducing understanding, remove it. Target the length the reader's intent needs: short if the answer is simple, longer only if the subject genuinely requires depth.
+
+- **Brand voice first:** if a Brand Voice is provided above, it governs tone and vocabulary. The rules below apply on top of it.
+- **Answer first.** Lead each section with the direct, useful answer, then explain why / how / when / the trade-offs / the exceptions. No throat-clearing intros; never bury the answer.
+- **Be specific, not generic.** Prefer numbers over vague claims, examples over abstractions, concrete steps over general advice, and first-hand / business-specific detail (from the grounding + author answers) over recycled information. Instead of "the resort offers great dining," write the actual restaurants, cuisines, and what makes them worth booking.
+- **Human register.** Active voice. Vary sentence length and paragraph length naturally — do not make every sentence, paragraph, or section the same shape. Confident but not arrogant; no hedging ("might", "arguably"), no hype. At most one adjective, and only when it carries real information (never adjective stacks like "stunning, luxurious, world-class, unforgettable").
+- **Cut the filler.** Delete obvious statements, empty intros, generic conclusions, and clichés. **Banned openers/closers/phrases** (never use): "In today's … world", "In the ever-changing landscape", "In the digital age", "When it comes to", "It's important to note", "At the end of the day", "Let's dive in", "Let's take a look", "Here's the thing", "In conclusion", "In summary", "To summarize", "Unlock", "Elevate", "Take your … to the next level", "Nestled", "game-changing", "revolutionary", "seamless", "robust", "cutting-edge". Don't lean on "Moreover / Furthermore / Additionally" — connect ideas by logic.
+- **Sound human, not templated.** Avoid the AI-tells: "Not only X, but also Y", "Whether you're X or Y", "From X to Y", repetitive parallel sentence openings, and perfectly symmetrical sections written for consistency rather than the subject. Let the structure follow the actual content.
+- **Self-contained + consistent (for both humans and AI retrieval).** Each section must make sense on its own — state the subject explicitly rather than relying on "this / that / it" pointing back several paragraphs. Use the SAME name for an entity throughout (don't alternate names in ways that confuse). Keep each important claim next to its supporting detail.
+- **E-E-A-T & accuracy.** Demonstrate real expertise; distinguish verified fact from informed opinion from recommendation. Never invent statistics, studies, quotes, prices, dates, awards, or testimonials. If a fact isn't grounded or genuinely public knowledge, leave it out (note it under "Data to collect" in PART C) — never assert it. No unsupported superlatives ("best", "#1", "leading") without grounded evidence.
+- **Never use em dashes (—).** Use a colon, a comma, parentheses, or two sentences. Readability grade 8–10.
+- **NO citation markup in the content.** PART A is finished, copy-paste-ready reader content. Never print bracketed tokens of any kind — `[graph:...]`, `[graph:author-first-party-N]`, `[web:...]`, `[not available in provided context]`, `[to verify]`, `[to source]`, node ids, or footnote markers. A reader must be able to paste PART A straight onto the site with zero cleanup.
+
+## FINAL EDITORIAL PASS (do this silently before emitting PART A)
+Read the draft as a demanding human editor and cut: filler, repetition, generic statements, unnecessary headings, redundant examples, marketing clichés, unsupported or weak claims, awkward keyword placements, and any paragraph mixing several unrelated ideas. Rewrite anything that sounds AI-generated into natural human prose. Ask: "Would a knowledgeable expert have written this sentence because it helps the reader?" If not, fix or delete it. The piece must read like an expert took the time to explain the topic clearly — not like an AI wrote 2,000 words to satisfy an SEO brief.
 
 --------------------------------------------------
 
-# FAQ — REQUIRED for article / guide / landing / listicle formats (a core value driver and top AI-citation surface)
+# FAQ — quality-gated (include ONLY where the FORMAT GUIDELINES call for it)
 
-**Skip the FAQ entirely for a Press Release / News Announcement — follow the FORMAT GUIDELINES structure instead.** For all other formats: end the piece with an on-page FAQ of **at least 10 questions**, taken directly from the APPROVED QUERY FAN-OUT above — use the fan-out queries as the questions, phrased the natural way a person would ask them. Answer rules:
-- **Never a bare yes/no.** Lead with the direct answer, then add the useful "so what" — the trade-off, the specific number/name/policy, or the next step a knowledgeable insider would give.
-- Anticipate the follow-up the reader hasn't asked yet and answer that too — elevate their expectations, don't just satisfy the literal question.
+**Follow the FORMAT GUIDELINES above for whether and how big the FAQ should be** — a Press Release has none; a Landing Page uses 4-6 objection-handling questions; a Blog/Guide includes an FAQ only when there are genuine *unresolved* reader questions (drawn from the approved fan-out). **Do NOT add an FAQ, or pad it to a number, just for SEO.** Include a question only if its answer is genuinely useful and not already covered in the body. When you do include FAQ answers:
+- **Never a bare yes/no.** Lead with the direct answer, then the useful "so what" — the trade-off, the specific number/name/policy, or the insider next step.
 - 40–90 words each, self-contained and quotable on its own by an AI engine.
-- Ground every factual claim (Odin or a cited high-authority source); no fabrication.
-Recommend `FAQPage` schema for it in the ops pack.
+- Ground every factual claim; no fabrication.
+Recommend `FAQPage` schema in the ops pack only if an FAQ is actually present.
 
 --------------------------------------------------
 
@@ -165,7 +169,7 @@ The finished, **paste-it-straight-onto-the-website** {article_type} — written 
 - **Genuinely useful and complete** — it fully answers the topic and every approved fan-out query, reads naturally in the brand voice, speaks to the target persona, and never feels like filler or a "me-too" article.
 - **SEO · AIO · GEO + E-E-A-T built in:** answer-first sections, entity-rich descriptive headings, semantic keyword coverage (never stuffing), demonstrated first-hand experience and real expertise, and first-party specifics from the grounding + author answers that make it the most citable source on the topic.
 
-Use the ADAPTIVE structure for this format/intent: an H1, an answer-first opening (no throat-clearing), entity-rich H2/H3 sections that each answer an approved fan-out query and stand alone, then the **REQUIRED FAQ section (≥10 Q&As, see FAQ rules above — omit for a Press Release and use the FORMAT GUIDELINES structure)**, and a genuine, non-generic ending with a concrete next step (never a "conclusion/summary" heading). Wrap ALL of it between:
+**Structure it per the FORMAT GUIDELINES above** (Blog / Landing Page / How-To / Comparison / Listicle / Pillar / Thought Leadership / Newsletter / Press Release each have their own shape). In all cases: a single `#` H1, an answer-first opening (no throat-clearing), entity-rich `##`/`###` sections that each cover one real reader question and stand alone, an FAQ only where the format calls for it and only for genuinely unresolved questions, and a genuine, non-generic ending with a concrete next step (never a "Conclusion"/"Summary" heading). Wrap ALL of it between:
 <<<PUBLISH_CONTENT_START>>>
 ...content...
 <<<PUBLISH_CONTENT_END>>>

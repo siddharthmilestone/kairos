@@ -303,10 +303,112 @@ _PRESS_RELEASE_GUIDELINES = (
 )
 
 
+# Per-format structure. Each block tells the writer the SHAPE this format must take, so the
+# output reads like a real Blog Post / Landing Page / How-To / etc. - not a generic article.
+_FORMAT_GUIDES = {
+    "blog article": (
+        "# FORMAT - BLOG ARTICLE\n"
+        "- **H1**: a specific, benefit-clear title (primary keyphrase used naturally, not forced).\n"
+        "- **Opening (no heading, 2-3 sentences)**: lead with the direct answer or key takeaway to the "
+        "reader's main question, then one line on why it matters. No throat-clearing.\n"
+        "- **Body**: entity-rich, descriptive `## H2` sections (add `### H3` only where a section needs "
+        "sub-parts). Each H2 answers one real reader question and stands on its own. Short paragraphs "
+        "(<=90 words). Use bullet lists for collections and a table when comparing 3+ things.\n"
+        "- Weave in concrete, grounded specifics (real names, numbers, policies from the grounding) - the "
+        "detail competitors lack.\n"
+        "- **FAQ**: a `## Frequently Asked Questions` block ONLY if there are genuine unresolved questions "
+        "(pull from the approved fan-out); each answer 40-90 words, direct-answer-first.\n"
+        "- **Close**: a genuine, useful last section ending on a concrete next step tied to the CTA. Never "
+        "a 'Conclusion'/'Summary' heading."
+    ),
+    "listicle": (
+        "# FORMAT - LISTICLE\n"
+        "- **H1**: names the list and its value (e.g. 'X ways to ...', 'The N best ... for ...').\n"
+        "- **Opening**: one short paragraph stating the **selection criteria** - why these items, how "
+        "they were chosen. No filler intro.\n"
+        "- **Each item = one `## H2`** (numbered or named). Keep formatting consistent across items: a "
+        "one-line what-it-is, why it belongs / who it's for, and a concrete grounded detail. Every item "
+        "must be materially useful - do NOT pad to hit a round number.\n"
+        "- Use a short comparison **table** if the items share comparable attributes.\n"
+        "- **Close**: a one-paragraph how-to-choose, ending on the next step."
+    ),
+    "how-to guide": (
+        "# FORMAT - HOW-TO GUIDE\n"
+        "- **H1**: 'How to <accomplish the outcome>'.\n"
+        "- **Opening**: state exactly what the reader will accomplish and, in one line, the end result.\n"
+        "- **`## Before you start`**: prerequisites / what they need.\n"
+        "- **`## Steps`**: numbered steps as `### Step 1: <action>` ... Each step: the action, a short "
+        "explanation of why, and the expected outcome of that step. Do not omit steps to be shorter.\n"
+        "- Call out **warnings / common mistakes** inline where they matter.\n"
+        "- **`## Troubleshooting`** (only if useful): the 2-4 things most likely to go wrong + the fix.\n"
+        "- **Close**: the expected final result + a concrete next step. Consider `HowTo` schema in the ops pack."
+    ),
+    "comparison article": (
+        "# FORMAT - COMPARISON ARTICLE\n"
+        "- **H1**: 'X vs Y' (or 'Best ... compared').\n"
+        "- **Opening**: the direct bottom-line-up-front answer (who should pick what), then the criteria "
+        "you'll compare.\n"
+        "- **`## How we compared`**: define the evaluation criteria FIRST, and apply the SAME criteria to "
+        "every option.\n"
+        "- **Comparison table**: options as columns (or rows), the shared criteria as the other axis - "
+        "extractable at a glance.\n"
+        "- **One `## H2` per option**: what it is, **who it's best for**, and its **limitations**. Make "
+        "trade-offs explicit; never declare an unqualified 'winner' - frame it by use case.\n"
+        "- **Close**: a decision framework ('choose A if..., choose B if...') + next step."
+    ),
+    "landing page": (
+        "# FORMAT - LANDING PAGE (conversion-focused, scannable)\n"
+        "- **H1**: a sharp value proposition - the outcome the reader gets, not a feature list.\n"
+        "- **Subhead (1-2 lines)**: who it's for + the core benefit, in plain language.\n"
+        "- **Benefit sections**: 3-5 short `## H2` blocks, each a concrete benefit (not a feature dump), "
+        "1-3 tight sentences or a short bullet list each. Lead with outcomes.\n"
+        "- **Trust / proof**: include ONLY grounded, real proof (named amenities, awards, specifics from "
+        "the grounding). Never invent testimonials, stats, or logos.\n"
+        "- **`## Frequently Asked Questions`**: 4-6 questions that handle the reader's real objections "
+        "before they convert.\n"
+        "- **Primary CTA**: a clear, single next action aligned to intent, repeated once near the end. "
+        "Persuasive but not hypey - no aggressive sales language. Keep the whole page tight and skimmable."
+    ),
+    "pillar page": (
+        "# FORMAT - PILLAR PAGE (comprehensive hub)\n"
+        "- **H1**: the broad topic this hub owns.\n"
+        "- **Opening**: an answer-first overview of the whole topic + what the page covers.\n"
+        "- **Major `## H2` subtopics**: each is self-contained and could stand as its own article; use "
+        "`### H3` for the parts within. Cover the topic comprehensively and in logical order.\n"
+        "- Note natural **internal-link opportunities** to deeper supporting articles (as descriptive "
+        "anchor suggestions in the ops pack), where a subtopic deserves its own page.\n"
+        "- Use tables/lists to organize breadth. Depth and authority matter here more than brevity, but "
+        "every section must still earn its place.\n"
+        "- **Close**: where to go next (the key supporting pages) + the CTA."
+    ),
+    "thought leadership": (
+        "# FORMAT - THOUGHT LEADERSHIP\n"
+        "- **H1**: frames a clear point of view or thesis (not a generic topic label).\n"
+        "- **Opening**: state the original argument / stance up front.\n"
+        "- **Body `## H2` sections**: build the case with reasoning, industry context, and - most "
+        "important - a genuine original element: a framework, first-hand/operational insight, or a "
+        "grounded observation competitors don't have. Distinguish fact from informed opinion.\n"
+        "- Support claims with grounded evidence; be confident but never exaggerate or use unsupported "
+        "superlatives.\n"
+        "- **Close**: the forward-looking implication - what it means for the reader and what to do about it."
+    ),
+    "newsletter": (
+        "# FORMAT - NEWSLETTER (personable, scannable)\n"
+        "- **Subject-line + preview** belong in the ops pack; the body starts with a short, warm hook (1-2 "
+        "sentences) that says why this issue is worth the reader's time.\n"
+        "- **2-4 segments**, each a bolded lead-in (or short `## H2`) + a few useful sentences. Conversational "
+        "and specific, not corporate. One clear idea per segment.\n"
+        "- Include concrete, grounded specifics and, where natural, a link/next step per segment.\n"
+        "- **Sign-off**: a brief, human close + one primary CTA. No FAQ, no keyword padding."
+    ),
+}
+
+
 def format_guidelines(article_type: str, brand_name: str) -> str:
-    if (article_type or "").strip().lower() in ("press release", "press release calendar", "news article"):
+    at = (article_type or "").strip().lower()
+    if at in ("press release", "press release calendar", "news article"):
         return _PRESS_RELEASE_GUIDELINES.replace("{brand_name}", brand_name or "the brand")
-    return ""
+    return _FORMAT_GUIDES.get(at, "")
 
 
 def _parse_qa_pairs(topic_qa: str) -> list[tuple[str, str]]:
