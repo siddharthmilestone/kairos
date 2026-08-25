@@ -1414,7 +1414,7 @@ with main:
             "begin.</div></div>", unsafe_allow_html=True)
         c1, c2 = st.columns(2, gap="large")
         with c1:
-            with st.container(border=True, key="cstile_create"):
+            with st.container(border=False):
                 st.markdown(
                     "<div class='cs-opt'>"
                     "<div class='iconbadge'><svg viewBox='0 0 24 24' fill='none' width='22' height='22'>"
@@ -1429,7 +1429,7 @@ with main:
                              key="obj_create"):
                     st.session_state.mode = "create"; goto(1); st.rerun()
         with c2:
-            with st.container(border=True, key="cstile_optimize"):
+            with st.container(border=False):
                 st.markdown(
                     "<div class='cs-opt'>"
                     "<div class='iconbadge'><svg viewBox='0 0 24 24' fill='none' width='22' height='22'>"
