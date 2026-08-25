@@ -1340,59 +1340,62 @@ key = steps[step]
 ui.header(header_chips())
 ui.step_rail(steps, LABELS, step)
 with st.sidebar:
-    st.divider()
-    _MODEL_LABELS = {"opus": "Opus 4.8", "sonnet": "Sonnet 4.6"}
-    st.session_state.model = st.selectbox(
-        "Generation Model", ["opus", "sonnet"], index=0,
-        format_func=lambda m: _MODEL_LABELS.get(m, m))
-    if is_llm():
-        # Non-Odin business: the workflow is powered entirely by public-web/LLM grounding.
-        st.info(" **Public web (LLM)** grounding")
-        st.caption("This business is not in Odin, topics, research, and content are grounded from "
-                   "public sources and cited. Odin is not used.")
-    else:
-        # Never call Odin on initial render, that would block the whole page (incl. step 1)
-        # while a slow/hanging CLI call runs. Connectivity is verified live at the Business step.
-        conn = st.session_state.get("odin_conn")
-        if conn is None:
-            st.caption("Odin: checked at the Business step.")
-        elif conn.get("ok"):
-            st.success(f"Odin: {conn.get('signed_in_as') or 'connected'}")
-        elif conn.get("needs_reauth"):
-            st.error("Odin session expired")
-            st.caption(conn.get("message", ""))
-        else:
-            st.error("Odin not connected")
-            st.caption(conn.get("message", ""))
-        if st.button(" Recheck Odin"):
-            odin.list_clients.cache_clear()
-            with st.spinner("Rechecking Odin…"):
-                st.session_state.odin_conn = odin.probe()
-            st.rerun()
-
-    # --- generation engine health (finding 14) ---
-    st.divider()
+    # Compact status line — a single green/amber dot + one-word state, no boxes.
     eng = st.session_state.get("engine_health")
     if eng is None:
         eng = generate.health()
         st.session_state.engine_health = eng
-    label = "Engine: " + ("API" if eng.get("backend") == "api" else "Claude CLI")
-    (st.success if eng.get("ok") else st.error)(label + (" · ready" if eng.get("ok") else " · check needed"))
-    st.caption(eng.get("detail", ""))
-    if st.button(" Recheck engine"):
-        st.session_state.engine_health = generate.health()
-        st.rerun()
+    if is_llm():
+        grounding_state = ("#5B5BD6", "Public web")
+    else:
+        conn = st.session_state.get("odin_conn")
+        if conn is None:
+            grounding_state = ("#9AA3B4", "Odin: at Business step")
+        elif conn.get("ok"):
+            grounding_state = ("#0E9F6E", f"Odin: {conn.get('signed_in_as') or 'connected'}")
+        elif conn.get("needs_reauth"):
+            grounding_state = ("#C0392B", "Odin: sign-in needed")
+        else:
+            grounding_state = ("#C0392B", "Odin: not connected")
+    eng_dot = "#0E9F6E" if eng.get("ok") else "#C0392B"
+    eng_name = "API" if eng.get("backend") == "api" else "Claude CLI"
+    st.markdown(
+        f"<div class='cs-railstat'>"
+        f"<span><i style='background:{grounding_state[0]}'></i>{grounding_state[1]}</span>"
+        f"<span><i style='background:{eng_dot}'></i>Engine: {eng_name}</span></div>",
+        unsafe_allow_html=True)
 
-    # --- run observability (finding 20) ---
-    _runs = runlog.summary()
-    if _runs.get("total"):
-        with st.expander(f" Run log · {_runs['total']} generations"):
+    with st.popover("System & settings", use_container_width=True):
+        _MODEL_LABELS = {"opus": "Opus 4.8", "sonnet": "Sonnet 4.6"}
+        st.session_state.model = st.selectbox(
+            "Generation model", ["opus", "sonnet"], index=0,
+            format_func=lambda m: _MODEL_LABELS.get(m, m))
+        st.divider()
+        if is_llm():
+            st.caption("**Public web (LLM) grounding** — this business is not in Odin; topics, "
+                       "research, and content are grounded from public sources and cited.")
+        else:
+            conn = st.session_state.get("odin_conn") or {}
+            st.caption(f"**Odin:** {grounding_state[1].replace('Odin: ', '')}")
+            if conn.get("message"):
+                st.caption(conn["message"])
+            if st.button("Recheck Odin", use_container_width=True):
+                odin.list_clients.cache_clear()
+                with st.spinner("Rechecking Odin…"):
+                    st.session_state.odin_conn = odin.probe()
+                st.rerun()
+        st.divider()
+        st.caption(f"**Engine ({eng_name}):** {eng.get('detail', '')}")
+        if st.button("Recheck engine", use_container_width=True):
+            st.session_state.engine_health = generate.health()
+            st.rerun()
+        _runs = runlog.summary()
+        if _runs.get("total"):
+            st.divider()
             st.caption(
-                f"Avg {_runs.get('avg_duration_s', 0)}s · cache hits "
-                f"{round(_runs.get('cache_hit_rate', 0) * 100)}% · gate-fail "
+                f"**Run log** · {_runs['total']} generations · avg {_runs.get('avg_duration_s', 0)}s "
+                f"· cache {round(_runs.get('cache_hit_rate', 0) * 100)}% · gate-fail "
                 f"{round(_runs.get('gate_fail_rate', 0) * 100)}%")
-            if _runs.get("by_format"):
-                st.caption("By format: " + ", ".join(f"{k} {v}" for k, v in _runs["by_format"].items()))
 
 # step 1 owns its hero headline, so we skip the duplicate step title there
 ui.step_heading(LABELS[key], step, len(steps), show_title=(key != "objective"))

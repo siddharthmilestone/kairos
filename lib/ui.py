@@ -57,7 +57,7 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"], 
 #MainMenu, header[data-testid="stHeader"], footer {{ visibility:hidden; height:0; }}
 [data-testid="stToolbar"] {{ display:none; }}
 /* work canvas: capped + centered so the full app (264px rail + content) frames to ~1440 */
-.block-container {{ padding-top:2.6rem; padding-bottom:3rem; max-width:1180px; margin:0 auto;
+.block-container {{ padding-top:2.6rem; padding-bottom:5rem; max-width:1180px; margin:0 auto;
   padding-left:3rem; padding-right:3rem; background:transparent !important; }}
 
 /* persistent left nav, never collapses, fixed width */
@@ -88,33 +88,12 @@ hr {{ border:none !important; border-top:1px solid {LINE} !important; margin:1.1
 [data-testid="stCaptionContainer"], .stCaption {{ color:{MUTED} !important; }}
 [data-testid="stCaptionContainer"] p {{ font-size:12.5px !important; line-height:1.55 !important; color:{MUTED} !important; }}
 
-/* ============================ header ============================ */
-.cs-header {{ position:relative; background:
-    linear-gradient(180deg,#FFFFFF 0%,#FCFCFE 100%); border:1px solid {LINE}; border-radius:16px;
-  padding:17px 22px 16px; margin-bottom:20px; overflow:hidden;
-  box-shadow:0 8px 30px -12px rgba(23,27,58,.14), 0 1px 2px rgba(15,23,42,.04); }}
-.cs-header::before {{ content:""; position:absolute; left:0; top:0; bottom:0; width:4px;
-  background:linear-gradient(180deg,{ACCENT},{ACCENT_DK}); }}
-.cs-header::after {{ content:""; position:absolute; right:-60px; top:-70px; width:220px; height:220px;
-  border-radius:50%; background:radial-gradient(circle,rgba(91,91,214,.06),transparent 70%); pointer-events:none; }}
-.cs-header .cs-row {{ display:flex; align-items:center; gap:13px; }}
-.cs-mark {{ width:38px; height:38px; border-radius:11px;
-  background:linear-gradient(135deg,{ACCENT},{ACCENT_DK}); color:#fff;
-  display:flex; align-items:center; justify-content:center; font-weight:800; font-size:17px;
-  letter-spacing:.5px; flex:0 0 38px; box-shadow:0 4px 12px rgba(91,91,214,.4);
-  font-family:{DISPLAY}; }}
-.cs-header .cs-title {{ font-size:22px; font-weight:800; color:{INK}; letter-spacing:-.03em;
-  line-height:1.1; margin:0; }}
-.cs-header .cs-tag {{ font-size:12.5px; color:{MUTED}; margin-top:3px; }}
-.cs-chips {{ margin-top:14px; padding-top:14px; border-top:1px solid {LINE2};
-  display:flex; flex-wrap:wrap; gap:8px; }}
-.cs-chip {{ display:inline-flex; align-items:center; gap:7px; font-size:12px;
-  color:{BODY}; background:{PANEL}; border:1px solid {LINE}; padding:5px 12px; border-radius:9px;
-  white-space:nowrap; transition:border-color .12s ease; }}
-.cs-chip:hover {{ border-color:{ACCENT}; }}
-.cs-chip .k {{ color:{FAINT}; font-weight:700; text-transform:uppercase; font-size:9px; letter-spacing:.7px; }}
-.cs-chip .v {{ color:{INK}; font-weight:650; font-size:12px; }}
-.cs-chips-empty {{ font-size:12px; color:{FAINT}; margin-top:14px; padding-top:14px; border-top:1px solid {LINE2}; }}
+/* ============================ slim context strip (replaces the old header card) ==== */
+.cs-context {{ display:flex; flex-wrap:wrap; gap:16px; align-items:center;
+  margin:0 0 4px; padding:0; }}
+.cs-chip {{ display:inline-flex; align-items:baseline; gap:6px; font-size:12px; white-space:nowrap; }}
+.cs-chip .k {{ color:{FAINT}; font-weight:600; text-transform:uppercase; font-size:9.5px; letter-spacing:.8px; }}
+.cs-chip .v {{ color:{INK}; font-weight:600; font-size:12.5px; }}
 
 /* ============================ step heading ============================ */
 .cs-stepk {{ font-size:10.5px; font-weight:700; letter-spacing:1.3px; text-transform:uppercase;
@@ -134,11 +113,15 @@ hr {{ border:none !important; border-top:1px solid {LINE} !important; margin:1.1
   box-shadow:inset -1px 0 0 {NAV_LINE}; }}
 [data-testid="stSidebar"] * {{ color:{NAV_TXT}; }}
 [data-testid="stSidebar"] .block-container {{ padding:1.4rem 1rem 1.2rem; }}
-/* full-height rail so the bottom cluster (model · Odin · Recheck) sticks to the bottom */
+/* full-height rail so the compact status + settings cluster sticks to the bottom */
 [data-testid="stSidebar"] [data-testid="stSidebarUserContent"] > div:first-child {{
   display:flex; flex-direction:column; min-height:calc(100vh - 3rem); }}
-[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] hr:first-of-type {{ margin-top:auto !important; }}
 [data-testid="stSidebar"] hr {{ border-top:1px solid {NAV_LINE} !important; margin:1rem 0 !important; }}
+/* compact status line — small dots + one-word state, pushed to the bottom of the rail */
+.cs-railstat {{ margin-top:auto; padding-top:14px; border-top:1px solid {NAV_LINE};
+  display:flex; flex-direction:column; gap:7px; margin-bottom:10px; }}
+.cs-railstat span {{ display:flex; align-items:center; gap:8px; font-size:11.5px; color:{NAV_MUT}; }}
+.cs-railstat i {{ width:7px; height:7px; border-radius:50%; flex:0 0 7px; }}
 [data-testid="stSidebar"] label {{ color:{NAV_MUT} !important; font-size:10.5px !important;
   text-transform:uppercase; letter-spacing:.7px; font-weight:600; }}
 /* model selectbox on dark */
@@ -182,12 +165,11 @@ hr {{ border:none !important; border-top:1px solid {LINE} !important; margin:1.1
   box-shadow:0 0 0 4px rgba(91,91,214,.22); }}
 .cs-step.now .lbl {{ color:#FFFFFF; font-weight:700; }}
 
-/* ============================ reasoning widget (calm aside) ============================ */
-.cs-reason {{ background:{CARD}; border:1px solid {LINE}; border-radius:14px; padding:16px 18px;
-  box-shadow:0 1px 2px rgba(15,23,42,.03); position:sticky; top:12px; }}
-.cs-reason .rh {{ font-size:13px; font-weight:700; letter-spacing:.2px;
-  color:{ACCENT}; margin-bottom:10px; display:flex; align-items:center; gap:7px; }}
-.cs-reason .rh::before {{ content:""; width:7px; height:7px; border-radius:50%; background:{ACCENT}; flex:0 0 7px; }}
+/* ============================ reasoning widget (flat margin-note aside) ============================ */
+.cs-reason {{ background:transparent; border:none; border-left:2px solid {LINE}; border-radius:0;
+  padding:2px 0 2px 18px; box-shadow:none; position:sticky; top:16px; }}
+.cs-reason .rh {{ font-size:10.5px; font-weight:700; letter-spacing:1px; text-transform:uppercase;
+  color:{FAINT}; margin-bottom:9px; display:flex; align-items:center; gap:7px; }}
 .cs-reason .rt {{ font-size:14.5px; font-weight:700; color:{INK}; margin:0 0 9px; line-height:1.3; letter-spacing:-.01em; }}
 .cs-reason .rb, .cs-reason .rb p, .cs-reason .rb li {{ font-size:12.6px; line-height:1.62; color:{BODY};
   hyphens:none; overflow-wrap:break-word; word-break:normal; }}
@@ -319,14 +301,9 @@ div[data-testid="stExpander"] summary p, div[data-testid="stExpander"] summary s
 [data-testid="stAlert"] {{ border-radius:12px !important; padding:13px 17px !important;
   box-shadow:0 1px 3px rgba(15,23,42,.06) !important; }}
 [data-testid="stAlert"] p {{ font-size:13.5px !important; line-height:1.55 !important; font-weight:500 !important; }}
-/* container cards (st.container(border=True)) — soft, elevated, premium */
+/* container cards (st.container(border=True)) — FLAT: quiet hairline, no shadow, no lift */
 [data-testid="stVerticalBlockBorderWrapper"] {{ border-radius:14px !important;
-  border-color:{LINE} !important;
-  box-shadow:0 1px 2px rgba(15,23,42,.03), 0 10px 30px -18px rgba(23,27,58,.16) !important;
-  transition:box-shadow .16s ease, transform .16s ease, border-color .16s ease !important; }}
-[data-testid="stVerticalBlockBorderWrapper"]:hover {{
-  box-shadow:0 2px 4px rgba(15,23,42,.04), 0 18px 44px -22px rgba(23,27,58,.24) !important;
-  border-color:#DADFEC !important; }}
+  border:1px solid {LINE} !important; box-shadow:none !important; background:{CARD} !important; }}
 hr {{ border-color:{LINE} !important; }}
 .stSelectbox label, .stTextInput label, .stTextArea label, .stMultiSelect label, .stRadio label {{
   font-weight:600 !important; color:{INK} !important; }}
@@ -491,8 +468,10 @@ hr {{ border-color:{LINE} !important; }}
 .cs-tag2.accent {{ background:{ACCENT_SOFT}; border-color:#E0E2FB; color:{ACCENT}; }}
 .cs-tag2.ink {{ background:{INK}; border-color:{INK}; color:#fff; }}
 
-/* --- product footer (flows in-document at the end of content; never overlaps) --- */
-.cs-footer {{ margin:34px 0 4px; padding:16px 4px 4px; border-top:1px solid {LINE};
+/* --- product footer: sticky at the bottom, spanning the content area, minimal --- */
+.cs-footer {{ position:fixed; left:264px; right:0; bottom:0; z-index:40;
+  padding:10px 3rem; border-top:1px solid {LINE}; background:rgba(247,248,251,.86);
+  backdrop-filter:saturate(1.2) blur(10px); -webkit-backdrop-filter:saturate(1.2) blur(10px);
   display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; }}
 .cs-footer .l {{ display:flex; align-items:center; gap:9px; font-size:12.5px; color:{MUTED}; }}
 .cs-footer .l .m {{ width:20px; height:20px; border-radius:6px; background:linear-gradient(135deg,{ACCENT},#7C5CFF);
@@ -732,26 +711,15 @@ def inject_css():
 
 
 def header(chips: list[tuple[str, str]] | None):
+    """Slim in-flow context strip: just the run's chosen settings as quiet inline tags.
+    No card, no repeated branding (the rail already brands the app), no placeholder."""
     chips = chips or []
-    if chips:
-        chip_html = "".join(
-            f'<span class="cs-chip"><span class="k">{k}</span><span class="v">{v}</span></span>'
-            for k, v in chips)
-        strip = f'<div class="cs-chips">{chip_html}</div>'
-    else:
-        strip = '<div class="cs-chips-empty">Your run summary builds here as you go.</div>'
-    st.markdown(f"""
-<div class="cs-header">
-  <div class="cs-row">
-    <div class="cs-mark">K</div>
-    <div>
-      <div class="cs-title">Project Kairos</div>
-      <div class="cs-tag">Grounded content intelligence, every claim traced, scored, and citable.</div>
-    </div>
-  </div>
-  {strip}
-</div>
-""", unsafe_allow_html=True)
+    if not chips:
+        return
+    chip_html = "".join(
+        f'<span class="cs-chip"><span class="k">{k}</span><span class="v">{v}</span></span>'
+        for k, v in chips)
+    st.markdown(f'<div class="cs-context">{chip_html}</div>', unsafe_allow_html=True)
 
 
 def footer():
