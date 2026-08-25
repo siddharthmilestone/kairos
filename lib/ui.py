@@ -61,8 +61,11 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"], 
 .block-container {{ padding-top:2.6rem; padding-bottom:5rem; max-width:1180px; margin:0 auto;
   padding-left:3rem; padding-right:3rem; background:transparent !important; }}
 
-/* persistent left nav, never collapses, fixed width */
-[data-testid="stSidebar"] {{ min-width:264px !important; max-width:264px !important; }}
+/* persistent left nav, never collapses, fixed width — force it visible even when
+   Streamlit tries to auto-collapse it at narrow/HiDPI viewports */
+[data-testid="stSidebar"] {{ min-width:264px !important; max-width:264px !important;
+  transform:none !important; margin-left:0 !important; left:0 !important; visibility:visible !important; }}
+[data-testid="stSidebar"][aria-expanded="false"] {{ margin-left:0 !important; transform:none !important; }}
 [data-testid="stSidebarCollapseButton"], [data-testid="collapsedControl"],
 [data-testid="stSidebarCollapsedControl"], button[data-testid="baseButton-headerNoPadding"] {{ display:none !important; }}
 [data-testid="stSidebarResizeHandle"] {{ display:none !important; }}
