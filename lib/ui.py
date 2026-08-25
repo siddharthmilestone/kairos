@@ -20,19 +20,20 @@ MUTED = "#6B7280"     # gray-500 — secondary
 FAINT = "#9CA3AF"     # gray-400 — tertiary
 LINE = "#E5E7EB"      # gray-200 — borders
 LINE2 = "#F3F4F6"     # gray-100 — faint dividers / hover
-PANEL = "#F9FAFB"     # gray-50 — surfaces
+PANEL = "#F3F4F6"     # gray-100 — filled inputs / stronger surfaces
+SURFACE = "#F9FAFB"   # gray-50 — borderless card/panel fill (on a white canvas)
 CARD = "#FFFFFF"
-BG = "#F9FAFB"        # gray-50 — app canvas
+BG = "#FFFFFF"        # white app canvas — surfaces are distinguished by soft fills, not borders
 ACCENT = "#2563EB"    # blue-600 — primary (Preline)
 ACCENT_SOFT = "#EFF6FF"  # blue-50
 ACCENT_DK = "#1D4ED8"    # blue-700 (hover)
 GOOD = "#16A34A"; WARN = "#D97706"; BAD = "#DC2626"   # green-600 / amber-600 / red-600
-# light Preline app-shell sidebar
-NAV = "#FFFFFF"       # sidebar ground (white)
-NAV2 = "#F3F4F6"      # gray-100 — active/hover item
+# light borderless app-shell sidebar (soft gray-50 fill separates it from the white canvas)
+NAV = "#F9FAFB"       # sidebar ground (gray-50)
+NAV2 = "#EFF2F7"      # hover item
 NAV_TXT = "#374151"   # gray-700 — nav text
 NAV_MUT = "#6B7280"   # gray-500 — muted
-NAV_LINE = "#E5E7EB"  # gray-200 — sidebar border/dividers
+NAV_LINE = "#EEF0F4"  # faint divider (used sparingly)
 
 # Native, always-available premium font stacks — no network dependency (remote webfonts
 # were silently failing behind corporate networks and dropping the whole app to an ugly
@@ -49,12 +50,6 @@ CSS = f"""
 :root {{ color-scheme: light !important; }}
 html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"], .main {{
   background-color:{BG} !important; }}
-/* subtle atmospheric depth on the canvas — a faint indigo wash top-right, warm base */
-[data-testid="stMain"] {{
-  background-image:
-    radial-gradient(1100px 460px at 88% -8%, rgba(37,99,235,.04), transparent 60%),
-    radial-gradient(760px 380px at -6% 4%, rgba(37,99,235,.03), transparent 55%) !important;
-  background-attachment:fixed !important; }}
 #MainMenu, header[data-testid="stHeader"], footer {{ visibility:hidden; height:0; }}
 [data-testid="stToolbar"] {{ display:none; }}
 /* work canvas: capped + centered so the full app (264px rail + content) frames to ~1440 */
@@ -113,8 +108,7 @@ hr {{ border:none !important; border-top:1px solid {LINE} !important; margin:1.1
   background:{ACCENT}; }}
 
 /* ============================ dark navigation rail ============================ */
-[data-testid="stSidebar"] {{ background:{NAV} !important; border-right:none;
-  box-shadow:inset -1px 0 0 {NAV_LINE}; }}
+[data-testid="stSidebar"] {{ background:{NAV} !important; border-right:none; box-shadow:none; }}
 [data-testid="stSidebar"] * {{ color:{NAV_TXT}; }}
 [data-testid="stSidebar"] .block-container {{ padding:1.4rem 1rem 1.2rem; }}
 /* full-height rail so the compact status + settings cluster sticks to the bottom */
@@ -161,9 +155,9 @@ hr {{ border:none !important; border-top:1px solid {LINE} !important; margin:1.1
 .cs-step.now .n {{ background:{ACCENT}; color:#fff; border-color:{ACCENT}; }}
 .cs-step.now .lbl {{ color:{ACCENT_DK}; font-weight:600; }}
 
-/* ============================ reasoning widget (flat margin-note aside) ============================ */
-.cs-reason {{ background:transparent; border:none; border-left:2px solid {LINE}; border-radius:0;
-  padding:2px 0 2px 18px; box-shadow:none; position:sticky; top:16px; }}
+/* ============================ reasoning widget (borderless soft panel) ============================ */
+.cs-reason {{ background:{SURFACE}; border:none; border-radius:12px;
+  padding:16px 18px; box-shadow:none; position:sticky; top:16px; }}
 .cs-reason .rh {{ font-size:10.5px; font-weight:700; letter-spacing:1px; text-transform:uppercase;
   color:{FAINT}; margin-bottom:9px; display:flex; align-items:center; gap:7px; }}
 .cs-reason .rt {{ font-size:14.5px; font-weight:700; color:{INK}; margin:0 0 9px; line-height:1.3; letter-spacing:-.01em; }}
@@ -172,11 +166,11 @@ hr {{ border:none !important; border-top:1px solid {LINE} !important; margin:1.1
 .cs-reason .rb strong {{ color:{INK}; font-weight:600; }}
 .cs-reason .rb ul {{ margin:6px 0; padding-left:16px; }}
 .cs-reason .rb li {{ margin-bottom:5px; }}
-.cs-reason .rb code {{ background:{PANEL}; border:1px solid {LINE}; padding:1px 5px; border-radius:5px;
+.cs-reason .rb code {{ background:{CARD}; border:none; padding:1px 6px; border-radius:5px;
   font-size:11.5px; color:{INK}; }}
-.cs-pills {{ margin-top:13px; padding-top:11px; border-top:1px solid {LINE2}; }}
+.cs-pills {{ margin-top:13px; padding-top:11px; border-top:none; }}
 .cs-pill {{ display:inline-block; font-size:9.5px; font-weight:600; color:{MUTED}; letter-spacing:.2px;
-  background:{PANEL}; border:1px solid {LINE}; padding:3px 8px; border-radius:6px; margin:0 4px 5px 0; }}
+  background:{CARD}; border:none; padding:3px 9px; border-radius:6px; margin:0 4px 5px 0; }}
 
 /* ============================ buttons ============================ */
 .stButton > button, .stDownloadButton > button, .stFormSubmitButton > button,
@@ -206,16 +200,17 @@ hr {{ border:none !important; border-top:1px solid {LINE} !important; margin:1.1
   box-shadow:none !important; opacity:1 !important; cursor:not-allowed !important; }}
 .stButton > button:disabled * {{ color:{FAINT} !important; }}
 
-/* ============================ INPUTS, force light ============================ */
+/* ============================ INPUTS — borderless soft fill ============================ */
 [data-baseweb="select"] > div, [data-baseweb="input"], [data-baseweb="base-input"],
 .stTextInput input, .stTextArea textarea, .stNumberInput input,
 [data-baseweb="select"] input, [data-baseweb="textarea"] {{
-  background-color:{CARD} !important; color:{INK} !important;
-  border-color:{LINE} !important; border-radius:8px !important; }}
+  background-color:{PANEL} !important; color:{INK} !important;
+  border:1px solid transparent !important; border-radius:8px !important; }}
 .stTextInput input::placeholder, .stTextArea textarea::placeholder {{ color:{FAINT} !important; }}
-/* focus ring on the wrapping control */
+/* focus: lift to white + blue ring, no hard border */
 .stTextInput div[data-baseweb="input"]:focus-within, .stTextArea div[data-baseweb="textarea"]:focus-within,
 [data-baseweb="select"] > div:focus-within {{
+  background-color:{CARD} !important;
   border-color:{ACCENT} !important; box-shadow:0 0 0 3px {ACCENT_SOFT} !important; }}
 [data-baseweb="select"] div, [data-baseweb="select"] span, [data-baseweb="select"] svg {{ color:{INK} !important; fill:{MUTED} !important; }}
 /* dropdown popover menu */
@@ -235,32 +230,30 @@ hr {{ border:none !important; border-top:1px solid {LINE} !important; margin:1.1
 [data-testid="stFileUploaderDropzone"] * {{ color:{BODY} !important; }}
 
 /* ============================ misc ============================ */
-[data-testid="stMetric"] {{ background:{CARD}; border:1px solid {LINE}; border-radius:12px;
-  padding:13px 15px; box-shadow:0 1px 2px rgba(15,23,42,.03); }}
+[data-testid="stMetric"] {{ background:{SURFACE}; border:none; border-radius:12px;
+  padding:14px 16px; box-shadow:none; }}
 [data-testid="stMetricValue"] {{ color:{INK}; font-size:1.55rem; font-weight:700; letter-spacing:-.02em; }}
 [data-testid="stMetricLabel"] {{ color:{MUTED}; }}
 [data-testid="stMetricLabel"] p {{ font-size:12px !important; font-weight:600 !important;
   text-transform:uppercase; letter-spacing:.3px; color:{MUTED} !important; }}
-/* --- tabs: clear separation, readable labels, visible active indicator --- */
+/* --- tabs: borderless pill tabs (soft blue active, no underline, no divider) --- */
 .stTabs [data-baseweb="tab-list"] {{
-  gap:8px !important; border-bottom:1px solid {LINE} !important;
-  margin-bottom:6px !important; flex-wrap:wrap !important; row-gap:4px !important; }}
+  gap:6px !important; border-bottom:none !important;
+  margin-bottom:8px !important; flex-wrap:wrap !important; row-gap:4px !important; }}
 .stTabs [data-baseweb="tab"] {{
-  font-weight:600 !important; font-size:13.5px !important; color:{BODY} !important;
-  padding:9px 16px !important; border-radius:9px 9px 0 0 !important;
-  white-space:nowrap !important; background:transparent !important;
-  border-bottom:2px solid transparent !important; margin-bottom:-1px !important; }}
+  font-weight:500 !important; font-size:13.5px !important; color:{BODY} !important;
+  padding:7px 14px !important; border-radius:8px !important;
+  white-space:nowrap !important; background:transparent !important; border:none !important; }}
 .stTabs [data-baseweb="tab"] * {{ color:inherit !important; font-weight:inherit !important; }}
-.stTabs [data-baseweb="tab"]:hover {{ background:{PANEL} !important; color:{INK} !important; }}
+.stTabs [data-baseweb="tab"]:hover {{ background:{SURFACE} !important; color:{INK} !important; }}
 .stTabs [data-baseweb="tab"][aria-selected="true"] {{
-  color:{ACCENT} !important; font-weight:600 !important; border-bottom:2px solid {ACCENT} !important; }}
-/* hide BaseWeb's default sliding highlight bar (we use our own border) */
+  color:{ACCENT_DK} !important; font-weight:600 !important; background:{ACCENT_SOFT} !important; }}
 .stTabs [data-baseweb="tab-highlight"], .stTabs [data-baseweb="tab-border"] {{ display:none !important; }}
 .stTabs [data-baseweb="tab-panel"] {{ padding-top:14px !important; }}
-div[data-testid="stExpander"] {{ border:1px solid {LINE}; border-radius:12px; margin-bottom:9px;
-  box-shadow:0 1px 2px rgba(15,23,42,.03); overflow:hidden; background:{CARD}; }}
+div[data-testid="stExpander"] {{ border:none !important; border-radius:12px; margin-bottom:8px;
+  box-shadow:none !important; overflow:hidden; background:{SURFACE}; }}
 div[data-testid="stExpander"] summary {{ padding:12px 16px !important; }}
-div[data-testid="stExpander"] summary:hover {{ background:{PANEL} !important; }}
+div[data-testid="stExpander"] summary:hover {{ background:{LINE2} !important; }}
 div[data-testid="stExpander"] summary p, div[data-testid="stExpander"] summary span {{
   font-weight:600 !important; color:{INK} !important; font-size:13.5px !important; }}
 /* FAQ section header — sets the accordion apart from body prose */
@@ -294,10 +287,9 @@ div[data-testid="stExpander"] summary p, div[data-testid="stExpander"] summary s
 [data-testid="stAlert"] {{ border-radius:10px !important; padding:12px 15px !important;
   box-shadow:none !important; }}
 [data-testid="stAlert"] p {{ font-size:13.5px !important; line-height:1.55 !important; font-weight:500 !important; }}
-/* container cards (st.container(border=True)) — Preline: white, gray-200 border, rounded-xl, whisper shadow */
-[data-testid="stVerticalBlockBorderWrapper"] {{ border-radius:12px !important;
-  border:1px solid {LINE} !important; background:{CARD} !important;
-  box-shadow:0 1px 2px 0 rgba(16,24,40,.04) !important; }}
+/* container cards (st.container(border=True)) — BORDERLESS: soft gray-50 fill, no border, no shadow */
+[data-testid="stVerticalBlockBorderWrapper"] {{ border-radius:14px !important;
+  border:none !important; background:{SURFACE} !important; box-shadow:none !important; }}
 hr {{ border-color:{LINE} !important; }}
 .stSelectbox label, .stTextInput label, .stTextArea label, .stMultiSelect label, .stRadio label {{
   font-weight:600 !important; color:{INK} !important; }}
@@ -475,6 +467,35 @@ hr {{ border-color:{LINE} !important; }}
 .cs-footer .r .dot {{ color:{FAINT}; margin:0 5px; }}
 .cs-footer .r a {{ color:{ACCENT}; font-weight:700; text-decoration:none; }}
 .cs-footer .r a:hover {{ text-decoration:underline; }}
+
+/* ================= GLOBAL BORDERLESS PASS (surfaces read via soft fills + spacing, never lines) ================= */
+[data-testid="stVerticalBlockBorderWrapper"], [data-testid="stExpander"], [data-testid="stMetric"],
+[data-testid="stAlert"], [data-testid="stNotification"], [data-testid="stDataFrame"], [data-testid="stTable"],
+[data-testid="stJson"], [data-testid="stCode"], [data-testid="stCode"] pre, .stCode, .stCode pre, pre,
+[data-testid="stFileUploaderDropzone"], [data-baseweb="tag"],
+.cs-bucket, .cs-pickerwrap, .cs-srctile, .cs-preftile, .cs-forationale, .cs-foorig,
+.cs-gate, .cs-tag2, .cs-ent, .cs-qf, .cs-cov, .cs-step .n, .cs-reason .rb code, .cs-pill {{
+  border:none !important; }}
+.cs-faq-head {{ border-top:none !important; }}
+.cs-bucket {{ border-left:none !important; background:{SURFACE} !important; }}
+.cs-pills, .cs-chips, .cs-chips-empty, .cs-prmonth {{ border-top:none !important; border-bottom:none !important; }}
+/* filled surfaces stay legible on the white canvas without a border */
+[data-testid="stCode"], [data-testid="stCode"] pre, .stCode, pre, [data-testid="stJson"] {{ background:{SURFACE} !important; }}
+[data-testid="stDataFrame"], [data-testid="stFileUploaderDropzone"] {{ background:{SURFACE} !important; }}
+.cs-srctile, .cs-preftile, .cs-pickerwrap {{ background:{SURFACE} !important; box-shadow:none !important; }}
+.cs-srctile.on, .cs-preftile.on {{ background:{ACCENT_SOFT} !important; box-shadow:none !important; }}
+/* secondary / sidebar buttons -> soft filled (borderless), gray-100 so they read on gray-50 cards */
+.stButton > button, .stDownloadButton > button, .stFormSubmitButton > button,
+[data-testid="stBaseButton-secondary"], [data-testid="stSidebar"] .stButton > button {{
+  border:none !important; background:{PANEL} !important; color:{INK} !important; }}
+.stButton > button:hover, .stDownloadButton > button:hover,
+[data-testid="stSidebar"] .stButton > button:hover {{ background:{LINE} !important; border:none !important; }}
+/* primary keeps its solid blue fill (no visible border) */
+.stButton > button[kind="primary"], .stDownloadButton > button[kind="primary"],
+[data-testid="stBaseButton-primary"] {{ border:none !important; background:{ACCENT} !important; }}
+.stButton > button[kind="primary"]:hover, [data-testid="stBaseButton-primary"]:hover {{ background:{ACCENT_DK} !important; }}
+/* dividers: pure spacing, no rule */
+hr {{ border:none !important; background:transparent !important; height:0 !important; margin:16px 0 !important; }}
 </style>
 """
 
