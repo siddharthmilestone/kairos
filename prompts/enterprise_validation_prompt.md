@@ -38,12 +38,19 @@ Then a **parameter scorecard** table — for each parameter give a 0–100 score
 ...architecture rationale + parameter scorecard...
 <<<KAIROS_VALIDATION_END>>>
 
-## PART 3 — COMPETITIVE INTELLIGENCE & ENHANCEMENT RECOMMENDATIONS
-Do **live web research**: identify the **top 5 competitors** currently ranking / cited in SERP and AI Overviews for this topic. Summarise each briefly. Then identify what they cover that this content lacks (missing entities, unanswered questions, weak semantic coverage, missing examples/research/statistics/expert commentary/case studies, schema opportunities, visuals, downloadable assets, FAQs, interactive content).
-Produce a **prioritised recommendation table**. For each recommendation: what to add · why · expected visibility benefit · expected E-E-A-T improvement · expected GEO/AIO/LLM impact · implementation priority (P1/P2/P3) · supporting evidence. Recommend only grounded, evidence-backed additions.
+## PART 3 — COMPETITIVE INTELLIGENCE, INFORMATION GAIN & ENHANCEMENT RECOMMENDATIONS
+Do **live web research**: identify the **top 5 competitors** currently ranking / cited in SERP and AI Overviews for this topic. Summarise each briefly.
+
+Then MEASURE Information Gain, do not just assert it:
+1. **Coverage matrix** — a table with the key subtopics/entities/questions for this topic as rows, and columns: *This content* (✓/partial/✗) and each competitor (✓/✗). This makes overlap and gaps explicit.
+2. **Overlap estimate** — approximate what % of this content merely restates what the top competitors already say, and state it plainly. Lower is better.
+3. **Unique-to-us** — the specific points, first-party facts, data, framework, or synthesis THIS content offers that NO competitor does. If the honest answer is "little that's unique", say so and mark the Information-Gain verdict **WEAK**; otherwise **STRONG** with the evidence.
+4. **What competitors cover that we lack** — missing entities, unanswered questions, weak semantic coverage, missing examples/research/statistics/expert commentary/case studies, schema opportunities, visuals, FAQs.
+
+Then a **prioritised recommendation table**. For each: what to add · why · expected visibility benefit · expected E-E-A-T improvement · expected GEO/AIO/LLM impact · priority (P1/P2/P3) · supporting evidence. Recommend only grounded, evidence-backed additions.
 
 <<<COMPETITIVE_INTEL_START>>>
-...top-5 competitor analysis + prioritised recommendations...
+...top-5 competitors · coverage matrix · overlap % · unique-to-us · Information-Gain verdict (STRONG/WEAK) · prioritised recommendations...
 <<<COMPETITIVE_INTEL_END>>>
 
 ## PART 4 — ENTERPRISE GOVERNANCE & CERTIFICATION

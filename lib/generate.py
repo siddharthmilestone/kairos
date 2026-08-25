@@ -21,9 +21,47 @@ _TRANSIENT_SIGNS = (
 )
 
 
+_AUTH_SIGNS = ("authenticate", "oauth", "401", "expired", "not logged in", "please run",
+               "unauthorized", "invalid api key", "login")
+
+
 def _is_transient(text: str) -> bool:
     t = (text or "").lower()
     return any(s in t for s in _TRANSIENT_SIGNS)
+
+
+def _is_auth_error(text: str) -> bool:
+    return any(s in (text or "").lower() for s in _AUTH_SIGNS)
+
+
+def _backend() -> str:
+    return (os.environ.get("KAIROS_MODEL_BACKEND") or "cli").strip().lower()
+
+
+def _api_available() -> bool:
+    return bool(os.environ.get("ANTHROPIC_API_KEY"))
+
+
+def health() -> dict:
+    """Quick engine health for the sidebar. Never raises. Returns {ok, backend, detail}."""
+    if _backend() == "api":
+        ok = _api_available()
+        return {"ok": ok, "backend": "api",
+                "detail": "Anthropic API backend ready" if ok else "ANTHROPIC_API_KEY not set"}
+    have_cli = bool(CLAUDE_BIN and shutil.which(CLAUDE_BIN.split("/")[-1]) or os.path.exists(CLAUDE_BIN))
+    try:
+        v = subprocess.run([CLAUDE_BIN, "--version"], capture_output=True, text=True, timeout=15)
+        if v.returncode == 0:
+            return {"ok": True, "backend": "cli",
+                    "detail": f"Claude CLI {v.stdout.strip()[:40]}"
+                              + (" · API fallback ready" if _api_available() else "")}
+    except Exception:  # noqa: BLE001
+        pass
+    if _api_available():
+        return {"ok": True, "backend": "api", "detail": "Claude CLI unavailable — using API fallback"}
+    return {"ok": have_cli, "backend": "cli",
+            "detail": "Claude CLI found — run a generation to confirm login" if have_cli
+                      else "Claude CLI not found. Install it or set ANTHROPIC_API_KEY."}
 
 
 def generate(prompt: str, model: str = "opus", timeout: int = 900,
@@ -38,6 +76,11 @@ def generate(prompt: str, model: str = "opus", timeout: int = 900,
     run 15–20+ minutes). Keep `allow_tools=True` where live web research is the
     point (content draft, fan-out SERP, optimize plan).
     """
+    # explicit API backend, or CLI missing but API available → use the API path directly
+    if _backend() == "api" or (not os.path.exists(CLAUDE_BIN) and _api_available()):
+        from lib import generate_api
+        return generate_api.generate(prompt, model=model, timeout=timeout, allow_tools=allow_tools)
+
     env = dict(os.environ)
     env["PATH"] = f"{HOME}/.local/bin:" + env.get("PATH", "")
     args = [
@@ -67,6 +110,20 @@ def generate(prompt: str, model: str = "opus", timeout: int = 900,
             last_err = "claude -p returned empty output."
         else:
             last_err = (proc.stderr or proc.stdout).strip()[:800]
+            # CLI auth failure (login expired) → fall back to the API backend if it's configured
+            if _is_auth_error(last_err) and _api_available():
+                try:
+                    from lib import generate_api
+                    return generate_api.generate(prompt, model=model, timeout=timeout,
+                                                 allow_tools=allow_tools)
+                except Exception:  # noqa: BLE001 — surface the original, actionable CLI error
+                    raise RuntimeError(
+                        "Claude CLI login has expired (run `claude` then `/login`), and the API "
+                        f"fallback also failed. Original error: {last_err}")
+            if _is_auth_error(last_err):
+                raise RuntimeError(
+                    "Claude CLI login has expired. Run `claude` then `/login` to re-authenticate "
+                    f"(or set ANTHROPIC_API_KEY for the API backend). Details: {last_err}")
             if not _is_transient(last_err):
                 raise RuntimeError(f"claude -p failed (exit {proc.returncode}): {last_err}")
         if attempt < attempts - 1:

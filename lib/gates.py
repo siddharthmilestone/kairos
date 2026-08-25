@@ -46,9 +46,22 @@ def _first_n_words(md: str, n: int = 120) -> str:
     return " ".join(re.findall(r"\b[\w'-]+\b", txt)[:n]).lower()
 
 
+_EN_STOPWORDS = {"the", "and", "for", "with", "you", "your", "that", "this", "from", "are",
+                 "our", "will", "have", "not", "but", "they", "their", "what", "when", "how",
+                 "which", "book", "guest", "stay", "room"}
+
+
+def _looks_english(md: str) -> float:
+    words = re.findall(r"\b[a-zA-Z']+\b", (md or "").lower())
+    if len(words) < 40:
+        return 0.0
+    hits = sum(1 for w in words if w in _EN_STOPWORDS)
+    return hits / len(words)
+
+
 def run_gates(publish_md: str, *, article_type: str,
               restricted_terms: list[str] | None = None,
-              primary_keyword: str = "") -> dict:
+              primary_keyword: str = "", output_language: str = "English") -> dict:
     """Return {gates:[...], passed, warned, failed, hard_pass:bool, word_count, grade}."""
     md = publish_md or ""
     target = taxonomy.format_target(article_type)
@@ -122,6 +135,18 @@ def run_gates(publish_md: str, *, article_type: str,
         placed = pk in head or all(w in head for w in pk.split()[:4])
         add("keyword", "Primary keyword up top", "pass" if placed else "warn",
             f'“{primary_keyword}” in the H1/opening' if placed else f'“{primary_keyword}” not in the H1 or opening')
+
+    # 10 — localization (finding 18): when a non-English language is requested, flag content
+    # that still reads as English, and always prompt a native review.
+    lang = (output_language or "English").strip()
+    if lang.lower() != "english":
+        en_ratio = _looks_english(md)
+        if en_ratio > 0.12:
+            add("localization", f"Written in {lang}", "fail",
+                f"Content still reads as English — expected {lang}. Regenerate in {lang}.")
+        else:
+            add("localization", f"Localization ({lang})", "warn",
+                f"Appears to be in {lang}; recommend a native-speaker review before publishing.")
 
     passed = sum(1 for g in gates if g["status"] == "pass")
     warned = sum(1 for g in gates if g["status"] == "warn")

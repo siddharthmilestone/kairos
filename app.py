@@ -13,9 +13,10 @@ import streamlit as st
 import streamlit.components.v1 as components
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from lib import (artifacts, blockval, briefqa, cache, crawl, docs, enhance, fanout,  # noqa: E402
-                 generate, matcher, odin, opportunities, optplan, preferences, prcalendar,
-                 prompt, reasoning, taxonomy, topicgen, ui, validation)
+from lib import (artifacts, blockval, briefqa, cache, crawl, docs, enhance, factcheck,  # noqa: E402
+                 fanout, gates, generate, matcher, odin, opportunities, optplan, preferences,
+                 prcalendar, prompt, readability, reasoning, runlog, schema_ld, taxonomy,
+                 topicgen, ui, validation)
 
 st.set_page_config(page_title="Project Kairos", page_icon="", layout="wide")
 ui.inject_css()
@@ -301,6 +302,58 @@ def render_publish_blocks(blocks: list[dict], recs_by_idx: dict):
                     st.caption("No validation record for this block.")
 
 
+_GATE_ICON = {"pass": "✓", "warn": "!", "fail": "✕"}
+
+
+def preflight_gates(publish_md: str, opp: dict, article_type: str) -> dict:
+    return gates.run_gates(
+        publish_md, article_type=article_type,
+        restricted_terms=(st.session_state.get("brand_safety") or {}).get("restricted_terms"),
+        primary_keyword=(opp.get("keywords") or [""])[0] if opp.get("keywords") else "",
+        output_language=st.session_state.get("output_language", "English"))
+
+
+def render_quality_panel(pf: dict, opp: dict, client: dict):
+    """Always-on, instant quality gates + readability + fact-check status + cannibalization.
+    Runs deterministically the moment content exists (finding 13); the fact-check gate
+    (finding 2) shows once validation has been run."""
+    fc = st.session_state.get("factcheck")
+    hard = pf["hard_pass"] and (fc is None or fc.get("gate_pass"))
+    status_txt = "Ready to publish" if hard else "Needs attention before publishing"
+    tone = "good" if hard else ("bad" if pf["failed"] or (fc and not fc.get("gate_pass")) else "warn")
+    chips = "".join(
+        f"<span class='cs-gate cs-gate-{g['status']}' title='{_esc_html(g['detail'])}'>"
+        f"{_GATE_ICON.get(g['status'],'')} {_esc_html(g['label'])}</span>"
+        for g in pf["gates"])
+    fc_chip = ""
+    if fc is not None:
+        fcs = "pass" if fc.get("gate_pass") else "fail"
+        fc_chip = (f"<span class='cs-gate cs-gate-{fcs}' title='{_esc_html(fc.get('summary',''))}'>"
+                   f"{_GATE_ICON[fcs]} Fact-check gate</span>")
+
+    with st.container(border=True):
+        st.markdown(
+            f"<div class='cs-qhead cs-q-{tone}'><span class='cs-qdot'></span>"
+            f"<b>Pre-flight quality</b> · {status_txt}"
+            f"<span class='cs-qmeta'>{pf['word_count']} words · "
+            f"grade {pf['grade'] if pf['grade'] is not None else '—'} · "
+            f"{pf['passed']} pass / {pf['warned']} warn / {pf['failed']} fail</span></div>"
+            f"<div class='cs-gates'>{fc_chip}{chips}</div>", unsafe_allow_html=True)
+        if fc is None:
+            st.caption("Claim-level fact-check runs with **validation & scoring** below.")
+        elif fc.get("unverified"):
+            with st.expander(f"⚠ {len(fc['unverified'])} unverified claim(s) — review before publishing", expanded=False):
+                for c in fc["unverified"]:
+                    st.markdown(f"- {_esc_html(c.get('claim',''))}")
+
+    canni = check_cannibalization(client, opp)
+    if canni:
+        items = "; ".join(f"“{_esc_html(c['topic'])}” ({c['overlap']}%)" for c in canni)
+        st.warning(f"**Possible content overlap** with existing piece(s) for this client: {items}. "
+                   "Consider differentiating the angle or consolidating to avoid competing for the "
+                   "same queries.")
+
+
 def render_block_popover(rec: dict):
     """Popover body: block score, 7-point data-findings checklist, CMG subgraph (inline SVG)."""
     score = rec.get("score")
@@ -484,9 +537,13 @@ def validate_suite(content, opp, client, bundle, model, at, lang):
                            fanout_queries=st.session_state.get("fanout_selected") or [],
                            grounding_bundle=bundle, model=fast_model())
 
-    with _cf.ThreadPoolExecutor(max_workers=3) as ex:
-        fbv, fkve, fenh = ex.submit(_bv), ex.submit(_kve), ex.submit(_enh)
-        return fbv.result(), fkve.result(), fenh.result(), blocks
+    def _fc():  # claim-level fact verification (hallucination hard gate)
+        return factcheck.run(publish_content=content, brand_name=client["name"],
+                             grounding_bundle=bundle, model=fast_model())
+
+    with _cf.ThreadPoolExecutor(max_workers=4) as ex:
+        fbv, fkve, fenh, ffc = ex.submit(_bv), ex.submit(_kve), ex.submit(_enh), ex.submit(_fc)
+        return fbv.result(), fkve.result(), fenh.result(), blocks, ffc.result()
 
 
 def render_enhancements(bundle: dict, content: str, client: dict, model: str):
@@ -866,6 +923,40 @@ def render_preferences():
     with c2:
         _pref_picker("persona", personas)
 
+    _render_author_safety(opts, biz_name)
+
+
+def _render_author_safety(opts: dict, biz_name: str):
+    """E-E-A-T author identity + brand-safety guardrails (findings 8 & 11), editable, with
+    grounded defaults. Both flow into generation and the JSON-LD."""
+    a = st.session_state.get("author") or opts.get("author") or {}
+    bs = st.session_state.get("brand_safety") or opts.get("brand_safety") or {}
+    with st.expander("Author & brand safety  ·  E-E-A-T", expanded=False):
+        st.markdown("<div class='cs-fieldlabel'>Author (E-E-A-T) — appears as byline & in schema</div>",
+                    unsafe_allow_html=True)
+        ac1, ac2 = st.columns(2)
+        name = ac1.text_input("Author name", value=a.get("name") or f"{biz_name} Editorial Team",
+                              key="author_name_in")
+        title = ac2.text_input("Author title / role", value=a.get("title") or "Editorial Team",
+                               key="author_title_in")
+        bio = st.text_area("Author bio (credibility, first-hand expertise)", value=a.get("bio") or "",
+                           height=70, key="author_bio_in",
+                           placeholder="e.g. Two decades hosting guests on-property; writes from direct experience.")
+        st.session_state.author = {"name": name.strip(), "title": title.strip(), "bio": bio.strip()}
+
+        st.markdown("<div class='cs-fieldlabel' style='margin-top:10px'>Brand safety — hard guardrails</div>",
+                    unsafe_allow_html=True)
+        rt = st.text_input("Restricted terms (comma-separated) — never used in content",
+                           value=", ".join(bs.get("restricted_terms") or []), key="brand_rt_in",
+                           placeholder="cheap, world-class, guaranteed, competitor names…")
+        dis = st.text_area("Required disclaimers (one per line) — included where relevant",
+                           value="\n".join(bs.get("required_disclaimers") or []), height=60,
+                           key="brand_dis_in", placeholder="Rates are subject to availability.")
+        st.session_state.brand_safety = {
+            "restricted_terms": [t.strip() for t in rt.split(",") if t.strip()],
+            "required_disclaimers": [d.strip() for d in dis.splitlines() if d.strip()],
+        }
+
 
 def render_pr_calendar(cal: dict):
     """12-month calendar grid (1 scored story/month) + selected-story detail."""
@@ -1123,9 +1214,9 @@ def _load_cached_topics(client: dict, page_snapshot: dict | None):
 
 # ---- content cache (replay an identical generation configuration instantly) ----
 _CONTENT_KEYS = ("generated_md", "content_blocks", "block_records", "validation_md",
-                 "enhancements", "overall_block_score")
+                 "enhancements", "overall_block_score", "factcheck")
 # validation-derived keys — generated on demand in Review, NOT during the fast draft
-_VAL_KEYS = ("block_records", "validation_md", "enhancements", "overall_block_score")
+_VAL_KEYS = ("block_records", "validation_md", "enhancements", "overall_block_score", "factcheck")
 
 
 def content_cache_key(opp: dict, client: dict, mode: str) -> str:
@@ -1139,6 +1230,89 @@ def content_cache_key(opp: dict, client: dict, mode: str) -> str:
         s.get("page_url", "") if mode == "optimize" else "",
         s.get("opt_plan", "") if mode == "optimize" else "",
         ",".join(sorted(str(e) for e in (s.get("applied_enhancements") or []))))
+
+
+# ---- real internal links (from the client's sitemap) — finding 9 ----
+def _site_url_for(client: dict | None, bundle: dict | None) -> str:
+    """Best-effort base URL for the client: optimize page → grounding website → public profile."""
+    if st.session_state.get("mode") == "optimize" and st.session_state.get("page_url"):
+        return st.session_state["page_url"]
+    pp = st.session_state.get("public_profile") or {}
+    if pp.get("url"):
+        return pp["url"]
+    for rows in (bundle or {}).values():
+        if not isinstance(rows, list):
+            continue
+        for r in rows:
+            if not isinstance(r, dict):
+                continue
+            for k, v in (r.get("facts") or {}).items():
+                if isinstance(v, str) and re.match(r"^https?://", v) and "website" in k.lower():
+                    return v
+            if isinstance(r.get("url"), str) and r["url"].startswith("http"):
+                return r["url"]
+    return ""
+
+
+def get_internal_links(client: dict | None, bundle: dict | None) -> list[dict]:
+    """Get-or-cache the client's real sitemap URLs. Returns [] if none discoverable."""
+    site = _site_url_for(client, bundle)
+    if not site:
+        return []
+    ck = cache.key("sitemap", site)
+    data, _ = cache.load("sitemap", ck)
+    if data is not None:
+        return data
+    from lib import sitemap
+    links = sitemap.fetch_internal_links(site)
+    cache.save("sitemap", ck, links)
+    return links
+
+
+# ---- content cannibalization ledger — finding 10 ----
+def _pieces_key(client: dict | None) -> str:
+    return cache.key("pieces", (client or {}).get("id") or (client or {}).get("name") or "biz")
+
+
+def _token_set(*strs) -> set:
+    words = re.findall(r"[a-z0-9]+", " ".join(s for s in strs if s).lower())
+    stop = {"the", "and", "for", "with", "your", "our", "a", "an", "of", "to", "in", "on",
+            "best", "guide", "how", "what", "vs", "at", "is", "are", "you"}
+    return {w for w in words if len(w) > 2 and w not in stop}
+
+
+def check_cannibalization(client: dict | None, opp: dict) -> list[dict]:
+    """Warn if this topic strongly overlaps a piece already generated for this client."""
+    ledger, _ = cache.load("pieces", _pieces_key(client))
+    ledger = ledger or []
+    cur = _token_set(opp.get("core_topic"), " ".join(opp.get("keywords") or []))
+    if not cur:
+        return []
+    hits = []
+    for p in ledger:
+        prev = set(p.get("tokens") or [])
+        if not prev:
+            continue
+        jac = len(cur & prev) / max(1, len(cur | prev))
+        if jac >= 0.5 and p.get("topic", "").lower() != (opp.get("core_topic") or "").lower():
+            hits.append({"topic": p.get("topic"), "format": p.get("format"),
+                         "overlap": round(jac * 100), "at": p.get("at")})
+    return sorted(hits, key=lambda h: -h["overlap"])[:4]
+
+
+def record_piece(client: dict | None, opp: dict, article_type: str):
+    """Append this generated piece to the client's ledger (for cannibalization checks)."""
+    k = _pieces_key(client)
+    ledger, _ = cache.load("pieces", k)
+    ledger = ledger or []
+    slug = docs.safe_slug(opp.get("core_topic") or "content")
+    ledger = [p for p in ledger if p.get("slug") != slug][:200]  # replace same slug
+    import datetime as _dt
+    ledger.append({"slug": slug, "topic": opp.get("core_topic"), "format": article_type,
+                   "tokens": sorted(_token_set(opp.get("core_topic"),
+                                               " ".join(opp.get("keywords") or []))),
+                   "at": _dt.datetime.now().isoformat(timespec="seconds")})
+    cache.save("pieces", k, ledger)
 
 
 def get_pr_artifact_brief(scope: str) -> dict:
@@ -1195,6 +1369,30 @@ with st.sidebar:
             with st.spinner("Rechecking Odin…"):
                 st.session_state.odin_conn = odin.probe()
             st.rerun()
+
+    # --- generation engine health (finding 14) ---
+    st.divider()
+    eng = st.session_state.get("engine_health")
+    if eng is None:
+        eng = generate.health()
+        st.session_state.engine_health = eng
+    label = "Engine: " + ("API" if eng.get("backend") == "api" else "Claude CLI")
+    (st.success if eng.get("ok") else st.error)(label + (" · ready" if eng.get("ok") else " · check needed"))
+    st.caption(eng.get("detail", ""))
+    if st.button(" Recheck engine"):
+        st.session_state.engine_health = generate.health()
+        st.rerun()
+
+    # --- run observability (finding 20) ---
+    _runs = runlog.summary()
+    if _runs.get("total"):
+        with st.expander(f" Run log · {_runs['total']} generations"):
+            st.caption(
+                f"Avg {_runs.get('avg_duration_s', 0)}s · cache hits "
+                f"{round(_runs.get('cache_hit_rate', 0) * 100)}% · gate-fail "
+                f"{round(_runs.get('gate_fail_rate', 0) * 100)}%")
+            if _runs.get("by_format"):
+                st.caption("By format: " + ", ".join(f"{k} {v}" for k, v in _runs["by_format"].items()))
 
 # step 1 owns its hero headline, so we skip the duplicate step title there
 ui.step_heading(LABELS[key], step, len(steps), show_title=(key != "objective"))
@@ -1878,6 +2076,12 @@ with main:
                         except Exception:  # noqa: BLE001, never block generation on the artifact read
                             art_brief_text = ""
                     st.write("② Assembling workflow prompt…")
+                    try:  # real internal-link targets from the client's sitemap (best-effort)
+                        links = get_internal_links(client, bundle)
+                    except Exception:  # noqa: BLE001
+                        links = []
+                    if links:
+                        st.write(f"   {len(links)} real internal-link targets from the sitemap.")
                     fp = prompt.build_prompt(
                         opp, mode=mode, brand_name=client["name"],
                         brand_voice=st.session_state.get("brand_voice_text", ""),
@@ -1890,15 +2094,21 @@ with main:
                         optimization_plan=st.session_state.get("opt_plan", "") if mode == "optimize" else "",
                         fanout_queries=st.session_state.get("fanout_selected"),
                         applied_enhancements=st.session_state.get("applied_enhancements"),
-                        artifact_brief=art_brief_text)
+                        artifact_brief=art_brief_text,
+                        author=st.session_state.get("author"),
+                        brand_safety=st.session_state.get("brand_safety"),
+                        internal_links=links)
                     st.session_state.final_prompt = fp
                     model = st.session_state.get("model", "opus")
                     at = eff_type()
                     lang = st.session_state.get("output_language", "English")
                     try:
+                        import time as _time
+                        _t0 = _time.time()
                         md = ui.run_with_progress(
                             lambda: generate.generate(fp, model=model), expected_seconds=210,
                             label="③ Research + write + KAIROS score/improve")
+                        _dur = round(_time.time() - _t0, 1)
                         st.session_state.generated_md = md
                         sec_now = docs.split_sections(md)
                         st.session_state.content_blocks = docs.split_blocks(sec_now["publish_content"])
@@ -1910,6 +2120,22 @@ with main:
                         st.session_state.dismissed_enh = []
                         st.session_state.content_ts = cache.save(
                             "content", ckin, {k: st.session_state.get(k) for k in _CONTENT_KEYS})
+                        # instant deterministic gates + observability (findings 13, 20)
+                        try:
+                            _pf = gates.run_gates(
+                                sec_now["publish_content"], article_type=at,
+                                restricted_terms=(st.session_state.get("brand_safety") or {}).get("restricted_terms"),
+                                primary_keyword=(opp.get("keywords") or [""])[0] if opp.get("keywords") else "",
+                                output_language=lang)
+                            record_piece(client, opp, at)
+                            runlog.append_run({
+                                "client": client.get("name"), "format": at, "model": model,
+                                "mode": mode, "duration_s": _dur, "cache_hit": False,
+                                "word_count": _pf.get("word_count"), "grade": _pf.get("grade"),
+                                "gates_failed": _pf.get("failed"), "gates_passed": _pf.get("passed"),
+                                "topic": opp.get("core_topic")})
+                        except Exception:  # noqa: BLE001 — telemetry must never block
+                            pass
                         status.update(label="Publish-ready draft is ready", state="complete")
                         goto(step + 1); st.rerun()
                     except Exception as e:  # noqa: BLE001
@@ -1935,6 +2161,18 @@ with main:
             recs_by_idx = {r["index"]: r for r in (st.session_state.get("block_records") or [])}
             overall = st.session_state.get("overall_block_score")
 
+            # --- always-on instant quality gates + fact-check status + cannibalization ---
+            pf = preflight_gates(sec["publish_content"], opp, at)
+            _gb = st.session_state.get("grounding_bundle") or {}
+            sld = schema_ld.build_all(
+                sec["publish_content"], article_type=at, brand_name=brand, topic=topic,
+                author=st.session_state.get("author"),
+                publisher_url=_site_url_for(client, _gb) or None,
+                grounding_bundle=_gb,
+                url=st.session_state.get("page_url") if st.session_state.get("mode") == "optimize" else None,
+                language=lang)
+            render_quality_panel(pf, opp, client)
+
             # --- optional validation & scoring (kept OUT of generation so the draft lands fast) ---
             _val_done = overall is not None or bool(vmd)
             if not _val_done:
@@ -1943,8 +2181,8 @@ with main:
                              "Per-paragraph validation, the KAIROS scorecard and competitive audit are "
                              "<b>optional</b> and run on demand (2-4 min).</div>", unsafe_allow_html=True)
                 if vc2.button("Run validation & scoring", type="primary", use_container_width=True, key="run_val"):
-                    with st.spinner("Validating paragraphs + enterprise audit + advisor (2-4 min)…"):
-                        br, vmd2, e2, blks = validate_suite(
+                    with st.spinner("Fact-check + paragraph validation + enterprise audit + advisor (2-4 min)…"):
+                        br, vmd2, e2, blks, fc2 = validate_suite(
                             sec["publish_content"], opp, client,
                             st.session_state.get("grounding_bundle") or {},
                             st.session_state.get("model", "opus"), at, lang)
@@ -1952,6 +2190,7 @@ with main:
                     st.session_state.validation_md = vmd2
                     st.session_state.enhancements = e2
                     st.session_state.content_blocks = blks
+                    st.session_state.factcheck = fc2
                     st.session_state.overall_block_score = blockval.overall_score(br)
                     st.session_state.dismissed_enh = []
                     st.session_state.content_ts = cache.save(  # re-cache with validation filled in
@@ -1979,7 +2218,7 @@ with main:
                                "to refresh them against the edited content.")
                     if st.button(" Re-validate edited content", type="primary", key="reval"):
                         with st.spinner("Re-validating the edited content (2–4 min)…"):
-                            br, vmd, e2, blks = validate_suite(
+                            br, vmd, e2, blks, fc = validate_suite(
                                 sec["publish_content"], opp, client,
                                 st.session_state.get("grounding_bundle") or {},
                                 st.session_state.get("model", "opus"), at, lang)
@@ -1987,6 +2226,7 @@ with main:
                         st.session_state.validation_md = vmd
                         st.session_state.enhancements = e2
                         st.session_state.content_blocks = blks
+                        st.session_state.factcheck = fc
                         st.session_state.overall_block_score = blockval.overall_score(br)
                         st.session_state.dismissed_enh = []
                         st.session_state.validation_stale = False
@@ -2037,7 +2277,17 @@ with main:
                     st.markdown(vparts["KAIROS_VALIDATION"])
             tabs[3].markdown(vparts.get("COMPETITIVE_INTEL") or "_(not available)_")
             tabs[4].markdown(vparts.get("GOVERNANCE") or "_(not available)_")
-            tabs[5].markdown(sec["ops_pack"] or "_(no ops pack)_")
+            with tabs[5]:
+                st.markdown(sec["ops_pack"] or "_(no ops pack)_")
+                st.divider()
+                st.markdown("#### Structured data (JSON-LD)")
+                if sld.get("blocks"):
+                    st.caption("Auto-generated from the finished content + grounding — paste into the "
+                               "page `<head>`. Included: "
+                               + ", ".join(b["type"] for b in sld["blocks"]) + ".")
+                    st.code(sld["script_html"], language="html")
+                else:
+                    st.caption("No structured data could be derived for this content.")
             tabs[6].code(md, language="markdown")
 
             # ---- downloads (no approval gate) ----
@@ -2060,21 +2310,35 @@ with main:
                 st.error(f"DOCX failed: {e}")
             cols[2].download_button(" Content (Markdown)", content_md.encode("utf-8"),
                                     file_name=f"{slug}.md", mime="text/markdown")
-            cert_md = "\n\n".join(x for x in [
+            # --- single enterprise deliverable: content + gates + fact-check + scorecard +
+            #     competitive evidence + governance + ops pack + JSON-LD (finding 15) ---
+            fc = st.session_state.get("factcheck")
+            gates_md = "\n".join(
+                f"- {_GATE_ICON.get(g['status'],'')} **{g['label']}** — {g['detail']}" for g in pf["gates"])
+            fc_md = ""
+            if fc:
+                fc_md = f"**Fact-check gate:** {'PASS' if fc.get('gate_pass') else 'FAIL'} — {fc.get('summary','')}"
+                if fc.get("unverified"):
+                    fc_md += "\n\nUnverified claims:\n" + "\n".join(
+                        f"- {c.get('claim','')}" for c in fc["unverified"])
+            schema_md = ("```html\n" + sld["script_html"] + "\n```") if sld.get("blocks") else ""
+            report_md = "\n\n".join(x for x in [
+                f"# {topic}\n\n{content_md}",
+                "# Quality Gates\n\n" + gates_md + (f"\n\n{fc_md}" if fc_md else ""),
                 f"# KAIROS Score Report\n\n{sec['score_report']}" if sec.get("score_report") else "",
                 f"# KAIROS Whole-Content Validation\n\n{vparts.get('KAIROS_VALIDATION','')}" if vparts.get("KAIROS_VALIDATION") else "",
-                f"# Competitive Intelligence\n\n{vparts.get('COMPETITIVE_INTEL','')}" if vparts.get("COMPETITIVE_INTEL") else "",
+                f"# Competitive Intelligence & Information Gain\n\n{vparts.get('COMPETITIVE_INTEL','')}" if vparts.get("COMPETITIVE_INTEL") else "",
                 f"# Enterprise Governance & Certification\n\n{vparts.get('GOVERNANCE','')}" if vparts.get("GOVERNANCE") else "",
-                f"# SEO & Ops Pack\n\n{sec['ops_pack']}" if sec.get("ops_pack") else ""] if x)
-            if cert_md:
-                try:
-                    cols[3].download_button(" Full report (PDF)",
-                        docs.markdown_to_pdf(cert_md, brand=brand,
-                                             topic=f"{topic}, Validation & Certification",
-                                             article_type=at, language=lang),
-                        file_name=f"{slug}-certification.pdf", mime="application/pdf")
-                except Exception as e:  # noqa: BLE001
-                    st.error(f"Report PDF failed: {e}")
+                f"# SEO & Ops Pack\n\n{sec['ops_pack']}" if sec.get("ops_pack") else "",
+                f"# Structured Data (JSON-LD)\n\n{schema_md}" if schema_md else ""] if x)
+            try:
+                cols[3].download_button(" Enterprise report (PDF)",
+                    docs.markdown_to_pdf(report_md, brand=brand,
+                                         topic=f"{topic} — Content, Validation & Certification",
+                                         article_type=at, language=lang),
+                    file_name=f"{slug}-enterprise-report.pdf", mime="application/pdf")
+            except Exception as e:  # noqa: BLE001
+                st.error(f"Report PDF failed: {e}")
 
             st.divider()
             r1, r2 = st.columns([1, 3])
