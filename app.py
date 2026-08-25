@@ -868,7 +868,7 @@ def _pref_picker(kind: str, items: list[dict]):
     else:
         it = items[names.index(choice)]
         _apply_pref(kind, it["name"], it.get(text_key, ""))
-        with st.container(border=True):
+        with st.container(border=True, key=f"cstile_pref_{kind}"):
             if it.get("summary"):
                 st.markdown(f"<div class='cs-prefsum'>{_esc_html(it['summary'])}</div>",
                             unsafe_allow_html=True)
@@ -1414,7 +1414,7 @@ with main:
             "begin.</div></div>", unsafe_allow_html=True)
         c1, c2 = st.columns(2, gap="large")
         with c1:
-            with st.container(border=True):
+            with st.container(border=True, key="cstile_create"):
                 st.markdown(
                     "<div class='cs-opt'>"
                     "<div class='iconbadge'><svg viewBox='0 0 24 24' fill='none' width='22' height='22'>"
@@ -1429,7 +1429,7 @@ with main:
                              key="obj_create"):
                     st.session_state.mode = "create"; goto(1); st.rerun()
         with c2:
-            with st.container(border=True):
+            with st.container(border=True, key="cstile_optimize"):
                 st.markdown(
                     "<div class='cs-opt'>"
                     "<div class='iconbadge'><svg viewBox='0 0 24 24' fill='none' width='22' height='22'>"
@@ -1443,9 +1443,6 @@ with main:
                 if st.button("Optimize A Page", use_container_width=True, type="primary",
                              key="obj_optimize"):
                     st.session_state.mode = "optimize"; goto(1); st.rerun()
-        st.markdown(
-            "<div class='cs-hint'>Planning ahead? Pick <b>Press Release Calendar</b> as your format on "
-            "the next step for a grounded 12-month PR plan.</div>", unsafe_allow_html=True)
 
     # -------------------------------------------------- output (format + language)
     elif key == "output":

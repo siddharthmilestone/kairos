@@ -137,13 +137,13 @@ hr {{ border:none !important; border-top:1px solid {LINE} !important; margin:1.1
 [data-testid="stSidebar"] .stButton > button:hover {{ background:{PANEL} !important; color:{INK} !important; border-color:#D1D5DB !important; }}
 [data-testid="stSidebar"] [data-testid="stCaptionContainer"] p {{ color:{NAV_MUT} !important; }}
 
-.cs-brand {{ display:flex; align-items:center; gap:10px; padding-top:2px; }}
-.cs-brand .m {{ width:32px; height:32px; border-radius:8px;
-  background:{ACCENT}; color:#fff;
-  display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px;
-  box-shadow:0 1px 2px rgba(0,0,0,.08); }}
-.cs-brand .t {{ font-size:15px; font-weight:600; color:{INK} !important; letter-spacing:-.01em; }}
-.cs-brand-sub {{ font-size:9.5px; color:{NAV_MUT} !important; margin:5px 0 22px 42px; text-transform:uppercase;
+.cs-brand {{ display:flex; align-items:center; gap:11px; padding-top:2px; }}
+.cs-brand .m {{ width:34px; height:34px; flex:0 0 34px; display:flex; align-items:center;
+  justify-content:center; filter:drop-shadow(0 2px 5px rgba(37,99,235,.28)); }}
+.cs-brand .m svg {{ display:block; }}
+.cs-brand .t {{ font-size:16px; font-weight:700; color:{INK} !important; letter-spacing:-.02em; }}
+.cs-brand .t .pk-project {{ font-weight:500; color:{MUTED} !important; }}
+.cs-brand-sub {{ font-size:9.5px; color:{NAV_MUT} !important; margin:6px 0 22px 45px; text-transform:uppercase;
   letter-spacing:.9px; font-weight:600; }}
 /* vertical nav (Preline app-shell): rounded item, blue-soft active, no spine clutter */
 .cs-step {{ display:flex; align-items:center; gap:11px; padding:8px 10px; border-radius:8px; margin:2px 0;
@@ -508,6 +508,24 @@ hr {{ border-color:{LINE} !important; }}
 .stButton > button[kind="primary"]:hover, [data-testid="stBaseButton-primary"]:hover {{ background:{ACCENT_DK} !important; }}
 /* dividers: pure spacing, no rule */
 hr {{ border:none !important; background:transparent !important; height:0 !important; margin:16px 0 !important; }}
+
+/* ================= OPT-IN BORDERED TILES (st.container(border=True, key="cstile_*")) ================= */
+/* Streamlit puts the key class on the inner stVerticalBlock; the border wrapper is its parent.
+   Target that wrapper so these specific containers become nice bordered cards (like the reasoning
+   aside), overriding the global borderless pass. */
+[data-testid="stVerticalBlockBorderWrapper"]:has([class*="st-key-cstile"]) {{
+  border:1px solid {LINE} !important; background:{CARD} !important;
+  border-radius:14px !important; box-shadow:0 1px 2px rgba(16,24,40,.04) !important; }}
+/* the two objective tiles are equal height: stretch their row + let each tile fill it */
+[data-testid="stHorizontalBlock"]:has([class*="st-key-cstile_create"]) {{ align-items:stretch !important; }}
+/* equal height: a shared min-height so both tiles match regardless of description length,
+   and the CTA pinned to the bottom for a clean aligned baseline */
+[data-testid="stVerticalBlockBorderWrapper"]:has([class*="st-key-cstile_create"]),
+[data-testid="stVerticalBlockBorderWrapper"]:has([class*="st-key-cstile_optimize"]) {{
+  min-height:340px !important; }}
+[class*="st-key-cstile_create"], [class*="st-key-cstile_optimize"] {{
+  min-height:340px !important; display:flex !important; flex-direction:column !important; }}
+[class*="st-key-cstile_create"] .stButton, [class*="st-key-cstile_optimize"] .stButton {{ margin-top:auto !important; }}
 </style>
 """
 
@@ -791,8 +809,20 @@ def section(title: str, sub: str | None = None):
     st.markdown(html + "</div>", unsafe_allow_html=True)
 
 
+KAIROS_LOGO = (
+    "<svg width='34' height='34' viewBox='0 0 34 34' fill='none' xmlns='http://www.w3.org/2000/svg'>"
+    "<defs><linearGradient id='kgrad' x1='2' y1='2' x2='32' y2='32' gradientUnits='userSpaceOnUse'>"
+    "<stop stop-color='#3B82F6'/><stop offset='1' stop-color='#1D4ED8'/></linearGradient></defs>"
+    "<rect width='34' height='34' rx='9' fill='url(#kgrad)'/>"
+    "<path d='M13 9.5V24.5' stroke='#fff' stroke-width='2.5' stroke-linecap='round'/>"
+    "<path d='M13 17.2L20.5 9.6' stroke='#fff' stroke-width='2.5' stroke-linecap='round'/>"
+    "<path d='M13 16.8L21 24.5' stroke='#fff' stroke-width='2.5' stroke-linecap='round'/>"
+    "<circle cx='24' cy='10.5' r='2.1' fill='#BFDBFE'/></svg>")
+
+
 def step_rail(order: list[str], labels: dict[str, str], current: int):
-    rows = ['<div class="cs-brand"><div class="m">K</div><div class="t">Project Kairos</div></div>',
+    rows = [f'<div class="cs-brand"><div class="m">{KAIROS_LOGO}</div>'
+            '<div class="t"><span class="pk-project">Project</span> Kairos</div></div>',
             '<div class="cs-brand-sub">Content workflow</div>']
     for i, key in enumerate(order):
         cls = "done" if i < current else ("now" if i == current else "")
