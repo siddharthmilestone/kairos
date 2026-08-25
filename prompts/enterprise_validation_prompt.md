@@ -39,6 +39,8 @@ Then a **parameter scorecard** table — for each parameter give a 0–100 score
 <<<KAIROS_VALIDATION_END>>>
 
 ## PART 3 — COMPETITIVE INTELLIGENCE, INFORMATION GAIN & ENHANCEMENT RECOMMENDATIONS
+**Research discipline:** retrieve only what closes a specific gap; use targeted, authoritative sources (not broad crawling); stop when the evidence is sufficient; never fabricate a competitor, fact, or metric; keep every claim tied to its source and prefer current data. Optimise for useful information gain, not volume.
+
 Do **live web research**: identify the **top 5 competitors** currently ranking / cited in SERP and AI Overviews for this topic. Summarise each briefly.
 
 Then MEASURE Information Gain, do not just assert it:

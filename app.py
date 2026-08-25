@@ -166,9 +166,9 @@ def topic_detail(opp: dict, show_match: bool = False):
     # intent badge + generated reasoning
     st.markdown(
         f"**Search intent:** {ui.intent_badge(opp.get('intent'))}"
-        f"<div style='background:#F8FAFC;border:1px solid #E2E8F0;border-left:3px solid #94A3B8;"
-        f"border-radius:8px;padding:8px 12px;margin:6px 0;font-size:12.8px;color:#334155;'>"
-        f"<b style='color:#0F172A;'>Why this intent:</b> "
+        f"<div style='background:#F8FAFC;border:1px solid #E5E7EB;border-left:3px solid #6B7280;"
+        f"border-radius:8px;padding:8px 12px;margin:6px 0;font-size:12.8px;color:#374151;'>"
+        f"<b style='color:#111827;'>Why this intent:</b> "
         f"{opp.get('intent_reasoning') or '-'}</div>",
         unsafe_allow_html=True)
     st.write(f"**Gap type:** `{opp.get('content_gap_type','-')}`  ·  "
@@ -226,7 +226,7 @@ def render_topic_picker(records: list[dict], key_prefix: str, show_match: bool =
                             c1.markdown(
                                 f"{mark}**{r['core_topic']}**  \n"
                                 f"{ui.intent_badge(r.get('intent'))} "
-                                f"<span style='color:#64748B;font-size:12px'>{r['pillar_topic']}{mtag}</span>",
+                                f"<span style='color:#4B5563;font-size:12px'>{r['pillar_topic']}{mtag}</span>",
                                 unsafe_allow_html=True)
                             if c2.button("Select", key=f"{key_prefix}_{n}"):
                                 if (st.session_state.get("selected_opp") or {}).get("id") != r["id"]:
@@ -359,14 +359,14 @@ def render_block_popover(rec: dict):
     score = rec.get("score")
     band = ("#1E6B3A" if (score or 0) >= 80 else "#8A6410" if (score or 0) >= 60 else "#9A2B2B")
     st.markdown(
-        f"<div style='font-size:13px;color:#334155;margin-bottom:6px'>Paragraph validation</div>"
-        f"<div style='font-size:26px;font-weight:800;color:{band};line-height:1'>"
-        f"{score if score is not None else '-'}<span style='font-size:13px;color:#94A3B8'> / 100</span></div>",
+        f"<div style='font-size:13px;color:#374151;margin-bottom:6px'>Paragraph validation</div>"
+        f"<div style='font-size:26px;font-weight:700;color:{band};line-height:1'>"
+        f"{score if score is not None else '-'}<span style='font-size:13px;color:#6B7280'> / 100</span></div>",
         unsafe_allow_html=True)
     # --- qualitative reasoning: why generated · memory-graph sources · coverage ---
     if rec.get("why"):
-        st.markdown(f"<div style='margin-top:10px;font-size:12.5px;color:#334155'>"
-                    f"<b style='color:#0F172A'>Why this was generated:</b> "
+        st.markdown(f"<div style='margin-top:10px;font-size:12.5px;color:#374151'>"
+                    f"<b style='color:#111827'>Why this was generated:</b> "
                     f"{_esc_html(rec['why'])}</div>", unsafe_allow_html=True)
     srcs = rec.get("sources") or []
     if srcs:
@@ -374,12 +374,12 @@ def render_block_popover(rec: dict):
             f"<span style='display:inline-block;font-size:10.5px;font-weight:600;color:#3730A3;"
             f"background:#EEF2FF;border:1px solid #E0E7FF;border-radius:6px;padding:2px 8px;"
             f"margin:3px 4px 0 0'>{_esc_html(s)}</span>" for s in srcs)
-        st.markdown("<div style='margin:10px 0 2px;font-size:10.5px;font-weight:700;color:#94A3B8;"
+        st.markdown("<div style='margin:10px 0 2px;font-size:10.5px;font-weight:700;color:#6B7280;"
                     "text-transform:uppercase;letter-spacing:.5px'>Memory-graph sources referenced</div>"
                     f"<div>{chips}</div>", unsafe_allow_html=True)
     if rec.get("coverage"):
         st.markdown(f"<div style='margin-top:8px;font-size:12.3px;color:#475569'>"
-                    f"<b style='color:#0F172A'>Knowledge coverage:</b> "
+                    f"<b style='color:#111827'>Knowledge coverage:</b> "
                     f"{_esc_html(rec['coverage'])}</div>", unsafe_allow_html=True)
     st.markdown("<div style='height:10px;border-top:1px solid #EDF1F5;margin-top:10px'></div>",
                 unsafe_allow_html=True)
@@ -391,17 +391,17 @@ def render_block_popover(rec: dict):
         rows.append(
             f"<div style='display:flex;gap:8px;padding:5px 0;border-top:1px solid #EDF1F5'>"
             f"<div style='flex:0 0 16px'>{icon}</div>"
-            f"<div><b style='color:#0F172A;font-size:12.5px'>{blockval.CHECK_LABELS[key]}</b>"
+            f"<div><b style='color:#111827;font-size:12.5px'>{blockval.CHECK_LABELS[key]}</b>"
             f"<div style='color:#475569;font-size:12px;line-height:1.45'>{_esc_html(c.get('note') or '-')}</div>"
             f"</div></div>")
     st.markdown("".join(rows), unsafe_allow_html=True)
     nodes = rec.get("cmg_nodes") or []
     st.markdown("<div style='font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;"
-                "color:#94A3B8;margin:12px 0 4px'>CMG nodes &amp; relationships</div>",
+                "color:#6B7280;margin:12px 0 4px'>CMG nodes &amp; relationships</div>",
                 unsafe_allow_html=True)
     if nodes:
         # inline SVG (no iframe) so it inherits the light theme and never renders dark
-        st.markdown(f"<div style='background:#FFFFFF;border:1px solid #E2E8F0;border-radius:8px;"
+        st.markdown(f"<div style='background:#FFFFFF;border:1px solid #E5E7EB;border-radius:8px;"
                     f"padding:6px'>{ui.subgraph_svg(nodes, rec.get('cmg_relations') or [])}</div>",
                     unsafe_allow_html=True)
     else:
@@ -415,9 +415,9 @@ def render_block_popover(rec: dict):
             f"<span style='display:inline-block;font-size:11px;color:#3730A3;background:#EEF2FF;"
             f"border:1px solid #E0E7FF;border-radius:7px;padding:3px 9px;margin:4px 5px 0 0'>"
             f"● {_esc_html(nm)}</span>" for nm in untapped)
-        st.markdown("<div style='margin:12px 0 2px;font-size:10.5px;font-weight:700;color:#94A3B8;"
+        st.markdown("<div style='margin:12px 0 2px;font-size:10.5px;font-weight:700;color:#6B7280;"
                     "text-transform:uppercase;letter-spacing:.5px'>Untapped context for this block</div>"
-                    "<div style='font-size:11.5px;color:#64748B;margin-bottom:4px'>Richer graph detail "
+                    "<div style='font-size:11.5px;color:#4B5563;margin-bottom:4px'>Richer graph detail "
                     "this paragraph doesn't reference yet:</div>"
                     f"<div>{chips}</div>", unsafe_allow_html=True)
 
@@ -554,7 +554,7 @@ def render_enhancements(bundle: dict, content: str, client: dict, model: str):
     st.markdown("##### Untapped context")
     untapped = enhance.untapped_entities(bundle, content)
     if untapped:
-        st.markdown("<div style='font-size:13px;color:#64748B;margin-bottom:6px'>Your memory graph holds "
+        st.markdown("<div style='font-size:13px;color:#4B5563;margin-bottom:6px'>Your memory graph holds "
                     "richer detail on this topic that the draft doesn't reference yet:</div>"
                     + "".join(f"<span class='cs-ent'>● {_esc_html(n)}</span>" for n in untapped),
                     unsafe_allow_html=True)
@@ -731,7 +731,7 @@ def render_fanout(fo: dict, has_page: bool):
     def _table_header():
         h = st.columns([0.5, 4.2, 1.9, 2.6, 3.6])
         for col, lbl in zip(h, ["", "Fan-Out Query", "Type", "User Intent", "Reasoning"]):
-            col.markdown(f"<div style='font-size:10.5px;font-weight:700;color:#94A3B8;"
+            col.markdown(f"<div style='font-size:10.5px;font-weight:700;color:#6B7280;"
                          f"text-transform:uppercase;letter-spacing:.4px'>{lbl}</div>",
                          unsafe_allow_html=True)
 
@@ -966,7 +966,7 @@ def render_pr_calendar(cal: dict):
     narr = cal.get("narratives") or []
     if narr:
         chips = "".join(f"<span class='cs-ent'>{_esc_html(n.get('name',''))}</span>" for n in narr)
-        st.markdown("<div style='font-size:10.5px;font-weight:700;color:#94A3B8;text-transform:"
+        st.markdown("<div style='font-size:10.5px;font-weight:700;color:#6B7280;text-transform:"
                     "uppercase;letter-spacing:.5px;margin-bottom:5px'>Strategic narratives</div>"
                     + chips, unsafe_allow_html=True)
     st.markdown("##### 12-month press-release calendar")
@@ -1350,7 +1350,7 @@ with st.sidebar:
     else:
         conn = st.session_state.get("odin_conn")
         if conn is None:
-            grounding_state = ("#9AA3B4", "Odin: at Business step")
+            grounding_state = ("#6B7280", "Odin: at Business step")
         elif conn.get("ok"):
             grounding_state = ("#0E9F6E", f"Odin: {conn.get('signed_in_as') or 'connected'}")
         elif conn.get("needs_reauth"):
@@ -2217,7 +2217,7 @@ with main:
                 if overall is not None:
                     st.markdown(
                         f"**Overall validation score: {overall}/100** "
-                        f"<span style='color:#64748B;font-size:12px'>· average of "
+                        f"<span style='color:#4B5563;font-size:12px'>· average of "
                         f"{len(recs_by_idx)} block scores · click the ⓘ beside any block for its "
                         f"validation checklist &amp; CMG graph</span>", unsafe_allow_html=True)
                     st.divider()
@@ -2255,7 +2255,7 @@ with main:
                 gnodes, grels, gtotal, gused = bundle_graph(_bundle, _used)
                 if gnodes:
                     st.markdown(
-                        f"<div style='background:#FFFFFF;border:1px solid #E2E8F0;border-radius:10px;"
+                        f"<div style='background:#FFFFFF;border:1px solid #E5E7EB;border-radius:10px;"
                         f"padding:8px'>{ui.grounding_graph_svg(gnodes, grels, width=760, height=470)}</div>",
                         unsafe_allow_html=True)
                     st.caption(
@@ -2269,7 +2269,7 @@ with main:
                     fnodes, frels = whole_content_graph(st.session_state.get("block_records") or [])
                     if fnodes:
                         st.markdown(
-                            f"<div style='background:#FFFFFF;border:1px solid #E2E8F0;border-radius:10px;"
+                            f"<div style='background:#FFFFFF;border:1px solid #E5E7EB;border-radius:10px;"
                             f"padding:8px'>{ui.subgraph_svg(fnodes, frels, width=760, height=380)}</div>",
                             unsafe_allow_html=True)
                         st.caption("Aggregated from the "

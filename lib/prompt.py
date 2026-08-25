@@ -95,6 +95,33 @@ def grounding_contract(bundle: Any, brand_name: str) -> str:
     return t.replace("{brand_name}", brand_name or "the brand")
 
 
+# Distilled Information Acquisition & Intelligence governance — injected into every
+# generation/research prompt so the model researches with discipline (objective-first,
+# existing-knowledge-first, gap-driven, authoritative + cheapest sufficient source, no
+# fabrication, facts-vs-inference, provenance, stop-when-sufficient).
+INFO_PRINCIPLES = (
+    "# INFORMATION ACQUISITION & INTELLIGENCE (govern every research/retrieval decision)\n"
+    "1. **Objective first, content last.** Before writing, be clear on the business objective, the "
+    "audience and what they need, and what this piece must accomplish. Write only once that is settled.\n"
+    "2. **Existing knowledge first.** Use the GROUNDING CONTEXT / provided data as the primary source. "
+    "Do NOT re-retrieve what is already known and reliable.\n"
+    "3. **Reason before retrieving.** Only seek external information to close a SPECIFIC gap that is "
+    "unknown, uncertain, outdated, or conflicting AND that materially changes the piece. Skip retrieval "
+    "that would not change the outcome.\n"
+    "4. **Most authoritative, cheapest sufficient source.** Prefer verified first-party / official / "
+    "high-authority sources. Use TARGETED retrieval (the specific page/section/fact), never broad "
+    "crawling by default. Retrieve the minimum needed and STOP once the evidence is sufficient.\n"
+    "5. **Maximise information gain, not volume.** Optimise useful, trustworthy information per cost — "
+    "never number of sources, pages, or words.\n"
+    "6. **Never fabricate to fill a gap.** If a required fact cannot be verified, state it is unknown, "
+    "omit it, or flag it 'to source' — never invent it.\n"
+    "7. **Separate facts from inference.** Keep verified FACT, INFERENCE, and RECOMMENDATION distinct; "
+    "never present an inference or recommendation as an established fact.\n"
+    "8. **Provenance & freshness.** Tie each important claim to its source; prefer current data; when "
+    "sources conflict, prefer the strongest/most recent and surface the uncertainty rather than hiding it.\n"
+)
+
+
 def _semantic_keywords(opp: dict) -> list[str]:
     """Derive (never fabricate) semantic keywords from grounded fields:
     entity labels + pillar + geo_signal-flavored related phrases.
@@ -600,6 +627,7 @@ def build_prompt(opp: dict, *, mode: str = "create", brand_name: str, brand_voic
     }
 
     filled = {
+        "{info_principles}": INFO_PRINCIPLES,
         "{mode_block}": (OPTIMIZE_MODE_BLOCK if is_optimize
                          else CREATE_MODE_BLOCK.replace("{article_type}", article_type or "Blog")),
         "{format_guidelines}": format_guidelines(article_type, brand_name),

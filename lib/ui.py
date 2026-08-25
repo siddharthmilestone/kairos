@@ -108,9 +108,13 @@ hr {{ border:none !important; border-top:1px solid {LINE} !important; margin:1.1
   background:{ACCENT}; }}
 
 /* ============================ dark navigation rail ============================ */
-[data-testid="stSidebar"] {{ background:{NAV} !important; border-right:none; box-shadow:none; }}
+[data-testid="stSidebar"] {{ background:{NAV} !important; border-right:none; box-shadow:none;
+  overflow:hidden !important; }}
+/* the rail never scrolls — its content is sized to fit the viewport */
+[data-testid="stSidebar"] [data-testid="stSidebarUserContent"],
+[data-testid="stSidebar"] > div {{ overflow:hidden !important; }}
 [data-testid="stSidebar"] * {{ color:{NAV_TXT}; }}
-[data-testid="stSidebar"] .block-container {{ padding:1.4rem 1rem 1.2rem; }}
+[data-testid="stSidebar"] .block-container {{ padding:1.3rem 1rem 1rem; }}
 /* full-height rail so the compact status + settings cluster sticks to the bottom */
 [data-testid="stSidebar"] [data-testid="stSidebarUserContent"] > div:first-child {{
   display:flex; flex-direction:column; min-height:calc(100vh - 3rem); }}
@@ -157,11 +161,13 @@ hr {{ border:none !important; border-top:1px solid {LINE} !important; margin:1.1
 .cs-step.now .n {{ background:{ACCENT}; color:#fff; }}
 .cs-step.now .lbl {{ color:{ACCENT_DK}; font-weight:600; }}
 
-/* ============================ reasoning widget (transparent aside — no grey block) ============================ */
-.cs-reason {{ background:transparent; border:none; border-radius:0;
-  padding:2px 0; box-shadow:none; position:sticky; top:16px; }}
-.cs-reason .rh {{ font-size:10.5px; font-weight:700; letter-spacing:1px; text-transform:uppercase;
-  color:{FAINT}; margin-bottom:9px; display:flex; align-items:center; gap:7px; }}
+/* ============================ reasoning widget (a nicely bordered card) ============================ */
+.cs-reason {{ background:{CARD}; border:1px solid {LINE}; border-radius:14px;
+  padding:16px 18px 17px; box-shadow:0 1px 2px rgba(16,24,40,.04); position:sticky; top:16px;
+  overflow:hidden; }}
+.cs-reason .rh {{ font-size:10.5px; font-weight:700; letter-spacing:.9px; text-transform:uppercase;
+  color:{ACCENT}; margin:0 0 10px; display:flex; align-items:center; gap:7px; }}
+.cs-reason .rh::before {{ content:""; width:7px; height:7px; border-radius:50%; background:{ACCENT}; flex:0 0 7px; }}
 .cs-reason .rt {{ font-size:14.5px; font-weight:700; color:{INK}; margin:0 0 9px; line-height:1.3; letter-spacing:-.01em; }}
 .cs-reason .rb, .cs-reason .rb p, .cs-reason .rb li {{ font-size:13px; line-height:1.62; color:{BODY};
   hyphens:none; overflow-wrap:break-word; word-break:normal; }}
@@ -267,7 +273,7 @@ div[data-testid="stExpander"] summary p, div[data-testid="stExpander"] summary s
 /* ============================ pre-flight quality panel + gate chips ============================ */
 .cs-qhead {{ display:flex; align-items:center; gap:9px; font-size:14px; color:{INK};
   letter-spacing:-.01em; margin:1px 0 12px; flex-wrap:wrap; }}
-.cs-qhead b {{ font-weight:750; }}
+.cs-qhead b {{ font-weight:700; }}
 .cs-qdot {{ width:9px; height:9px; border-radius:50%; flex:0 0 9px; }}
 .cs-q-good .cs-qdot {{ background:{GOOD}; box-shadow:0 0 0 4px {GOOD}22; }}
 .cs-q-warn .cs-qdot {{ background:{WARN}; box-shadow:0 0 0 4px {WARN}22; }}
@@ -318,7 +324,7 @@ hr {{ border-color:{LINE} !important; }}
 .cs-ib.transactional {{ background:#E3F2E8; color:#1E6B3A; }}
 .cs-ib.navigational {{ background:#EEE7F7; color:#5B3B8C; }}
 .cs-ib.local {{ background:#DCF2F0; color:#106B62; }}
-.cs-ib.other {{ background:#EDF1F5; color:#334155; }}
+.cs-ib.other {{ background:#EDF1F5; color:#374151; }}
 /* optimization-plan bucket cards */
 .cs-bucket {{ border:1px solid {LINE}; border-radius:12px; padding:14px 16px; margin-bottom:10px; }}
 .cs-bucket .bh {{ font-family:{SANS}; font-weight:700; font-size:13px;
@@ -334,7 +340,7 @@ hr {{ border-color:{LINE} !important; }}
   border-radius:11px; padding:11px 15px; margin:6px 0 14px; font-size:13px; color:{BODY}; line-height:1.55; }}
 .cs-forationale b {{ color:{INK}; }}
 .cs-foq {{ padding:3px 0 7px; }}
-.cs-foq .q {{ font-size:14px; font-weight:650; color:{INK}; line-height:1.4; }}
+.cs-foq .q {{ font-size:14px; font-weight:600; color:{INK}; line-height:1.4; }}
 .cs-foq .bar {{ height:5px; background:{LINE2}; border-radius:999px; margin:7px 0 6px; overflow:hidden; max-width:300px; }}
 .cs-foq .bar > i {{ display:block; height:100%; border-radius:999px;
   background:{ACCENT}; }}
@@ -348,7 +354,7 @@ hr {{ border-color:{LINE} !important; }}
 /* --- Qforia fan-out table (grouped under each original query) --- */
 .cs-foorig {{ margin:16px 0 4px; padding:8px 12px; background:{ACCENT_SOFT};
   border:1px solid #E0E2FB; border-radius:8px; line-height:1.45; }}
-.cs-foorig .on {{ display:inline-block; font-size:10px; font-weight:800; letter-spacing:.5px;
+.cs-foorig .on {{ display:inline-block; font-size:10px; font-weight:700; letter-spacing:.5px;
   text-transform:uppercase; color:{ACCENT}; margin-right:6px; }}
 .cs-foorig .oq {{ font-size:14.5px; font-weight:700; color:{INK}; }}
 .cs-foorig .oc {{ font-size:11px; color:{MUTED}; margin-left:6px; white-space:nowrap; }}
@@ -361,8 +367,8 @@ hr {{ border-color:{LINE} !important; }}
 .cs-imp {{ display:inline-block; font-size:10.5px; font-weight:700; letter-spacing:.3px; border-radius:6px;
   padding:2px 9px; text-transform:uppercase; }}
 .cs-imp.high {{ background:#E4EEFB; color:#1E4E8C; }}
-.cs-imp.medium {{ background:#EDF1F5; color:#334155; }}
-.cs-imp.low {{ background:#F1F5F9; color:#64748B; }}
+.cs-imp.medium {{ background:#EDF1F5; color:#374151; }}
+.cs-imp.low {{ background:#F1F5F9; color:#4B5563; }}
 .cs-enh-t {{ font-size:15px; font-weight:700; color:{INK}; margin:0 0 6px; }}
 .cs-enh-row {{ display:flex; gap:10px; font-size:13px; margin:3px 0; }}
 .cs-enh-row .k {{ flex:0 0 60px; color:{MUTED}; font-weight:600; }}
@@ -426,19 +432,19 @@ hr {{ border-color:{LINE} !important; }}
 .cs-preftile {{ border:1px solid {LINE}; border-radius:10px; background:{CARD}; padding:14px 15px 12px;
   margin-bottom:6px; min-height:96px; transition:border-color .12s ease, box-shadow .12s ease; }}
 .cs-preftile.on {{ border-color:{ACCENT}; box-shadow:0 0 0 3px {ACCENT_SOFT}; background:{ACCENT_SOFT}; }}
-.cs-preftile .ti {{ font-size:15px; font-weight:750; color:{INK}; letter-spacing:-.01em; }}
+.cs-preftile .ti {{ font-size:15px; font-weight:700; color:{INK}; letter-spacing:-.01em; }}
 .cs-preftile .de {{ font-size:12.5px; color:{BODY}; margin-top:5px; line-height:1.5; }}
 /* --- standard generation status bar (every AI/Odin step) --- */
 .cs-genstamp {{ display:flex; align-items:center; gap:8px; font-size:12.5px; color:{MUTED};
   padding:8px 2px; }}
-.cs-genstamp b {{ color:{BODY}; font-weight:650; }}
+.cs-genstamp b {{ color:{BODY}; font-weight:600; }}
 .cs-genstamp .dot {{ width:7px; height:7px; border-radius:999px; background:{GOOD};
   box-shadow:0 0 0 3px {GOOD}22; display:inline-block; }}
 .cs-genhint {{ font-size:12px; color:{MUTED}; padding:9px 2px; }}
 /* --- form field label + preference preview --- */
 .cs-fieldlabel {{ font-size:12px; font-weight:700; color:{INK}; text-transform:uppercase;
   letter-spacing:.4px; margin:0 0 6px; }}
-.cs-prefsum {{ font-size:13px; font-weight:650; color:{INK}; margin-bottom:6px; }}
+.cs-prefsum {{ font-size:13px; font-weight:600; color:{INK}; margin-bottom:6px; }}
 .cs-prefbody {{ font-size:13px; color:{BODY}; line-height:1.6; }}
 /* --- Choose Topic: wrap the faceted tabs in a big framed tile --- */
 .cs-pickerwrap {{ border:1px solid {LINE}; border-radius:14px; background:{CARD};
@@ -464,7 +470,7 @@ hr {{ border-color:{LINE} !important; }}
   display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; }}
 .cs-footer .l {{ display:flex; align-items:center; gap:9px; font-size:12.5px; color:{MUTED}; }}
 .cs-footer .l .m {{ width:20px; height:20px; border-radius:6px; background:{ACCENT};
-  color:#fff; display:inline-flex; align-items:center; justify-content:center; font-weight:800; font-size:10px; }}
+  color:#fff; display:inline-flex; align-items:center; justify-content:center; font-weight:700; font-size:10px; }}
 .cs-footer .l b {{ color:{INK}; font-weight:700; }}
 .cs-footer .r {{ font-size:12px; color:{FAINT}; }}
 .cs-footer .r .dot {{ color:{FAINT}; margin:0 5px; }}
@@ -530,7 +536,7 @@ def subgraph_svg(nodes: list, relations: list, width: int = 460, height: int = 3
         else:
             norm.append({"id": str(n), "label": str(n)})
     if not norm:
-        return "<div style='color:#94A3B8;font-size:12px'>No CMG nodes cited for this block.</div>"
+        return "<div style='color:#6B7280;font-size:12px'>No CMG nodes cited for this block.</div>"
 
     cx, cy, R = width / 2, height / 2, min(width, height) / 2 - 46
     by_key = {}
@@ -569,9 +575,9 @@ def subgraph_svg(nodes: list, relations: list, width: int = 460, height: int = 3
         x1, y1 = pos[si]; x2, y2 = pos[ti]
         mx, my = (x1 + x2) / 2, (y1 + y2) / 2
         parts.append(f'<line x1="{x1:.0f}" y1="{y1:.0f}" x2="{x2:.0f}" y2="{y2:.0f}" '
-                     f'stroke="#CBD5E1" stroke-width="1.4"/>')
+                     f'stroke="#D1D5DB" stroke-width="1.4"/>')
         if lab:
-            parts.append(f'<text x="{mx:.0f}" y="{my:.0f}" font-size="9" fill="#64748B" '
+            parts.append(f'<text x="{mx:.0f}" y="{my:.0f}" font-size="9" fill="#4B5563" '
                          f'text-anchor="middle">{_esc(lab[:16])}</text>')
     for i, nd in enumerate(norm):
         x, y = pos[i]
@@ -603,7 +609,7 @@ def grounding_graph_svg(nodes: list, relations: list, width: int = 760, height: 
         norm.append({"id": str(n.get("id") or lab), "label": lab,
                      "type": str(n.get("type") or "entity"), "used": bool(n.get("used"))})
     if not norm:
-        return "<div style='color:#94A3B8;font-size:12px'>No grounded entities to display.</div>"
+        return "<div style='color:#6B7280;font-size:12px'>No grounded entities to display.</div>"
 
     groups: "OrderedDict[str, list]" = OrderedDict()
     for nd in norm:
@@ -660,7 +666,7 @@ def grounding_graph_svg(nodes: list, relations: list, width: int = 760, height: 
                  f'text-anchor="middle">Odin</text>')
     for tx, ty, t, mid in type_labels:
         anc = "start" if math.cos(mid) >= 0 else "end"
-        parts.append(f'<text x="{tx:.0f}" y="{ty:.0f}" font-size="8.5" fill="#94A3B8" '
+        parts.append(f'<text x="{tx:.0f}" y="{ty:.0f}" font-size="8.5" fill="#6B7280" '
                      f'text-anchor="{anc}" font-weight="700">'
                      f'{_esc(t.replace("_"," ").upper()[:18])}</text>')
     for nd in norm:
@@ -668,13 +674,13 @@ def grounding_graph_svg(nodes: list, relations: list, width: int = 760, height: 
         used = nd["used"]
         parts.append(f'<circle cx="{x:.0f}" cy="{y:.0f}" r="4.5" '
                      f'fill="{"#0F2740" if used else "#FFFFFF"}" '
-                     f'stroke="{"#0F2740" if used else "#CBD5E1"}" stroke-width="1.3"/>')
+                     f'stroke="{"#0F2740" if used else "#D1D5DB"}" stroke-width="1.3"/>')
         lab = nd["label"]
         lab = lab if len(lab) <= 20 else lab[:19] + "…"
         anc = "start" if math.cos(ang) >= 0 else "end"
         dx = 7 if math.cos(ang) >= 0 else -7
         parts.append(f'<text x="{x+dx:.0f}" y="{y+3:.0f}" font-size="8.5" '
-                     f'fill="{"#0F172A" if used else "#64748B"}" '
+                     f'fill="{"#111827" if used else "#4B5563"}" '
                      f'font-weight="{"700" if used else "400"}" text-anchor="{anc}">{_esc(lab)}</text>')
     parts.append("</svg>")
     return "".join(parts)
