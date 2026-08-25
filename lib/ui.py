@@ -13,25 +13,26 @@ try:
 except Exception:  # pragma: no cover
     markdown2 = None
 
-INK = "#141B2E"       # deep navy-ink, headings + primary actions
-BODY = "#3D4658"      # cool slate, body text
-MUTED = "#697386"     # secondary
-FAINT = "#9AA3B4"     # tertiary
-LINE = "#E6E9F2"      # cool hairline border
-LINE2 = "#EEF0F7"     # faintest hairline
-PANEL = "#F4F6FB"     # mist canvas / surfaces
+# ---- Preline UI design tokens (Tailwind gray scale + blue-600 primary) ----
+INK = "#1F2937"       # gray-800 — headings / primary text
+BODY = "#4B5563"      # gray-600 — body text
+MUTED = "#6B7280"     # gray-500 — secondary
+FAINT = "#9CA3AF"     # gray-400 — tertiary
+LINE = "#E5E7EB"      # gray-200 — borders
+LINE2 = "#F3F4F6"     # gray-100 — faint dividers / hover
+PANEL = "#F9FAFB"     # gray-50 — surfaces
 CARD = "#FFFFFF"
-BG = "#F4F6FB"        # app canvas (mist), white panels sit on this for depth
-ACCENT = "#5B5BD6"    # indigo-violet, the single accent (state, progress, focus)
-ACCENT_SOFT = "#ECEDFB"  # indigo tint
-ACCENT_DK = "#4A46C4"
-GOOD = "#0E9F6E"; WARN = "#B45309"; BAD = "#C0392B"   # semantic (separate from accent)
-# dark navigation rail
-NAV = "#0E1526"       # rail ground (deep navy)
-NAV2 = "#161F36"      # rail elevated (active step)
-NAV_TXT = "#C9D0DE"   # rail text
-NAV_MUT = "#7C8598"   # rail muted
-NAV_LINE = "rgba(255,255,255,.08)"
+BG = "#F9FAFB"        # gray-50 — app canvas
+ACCENT = "#2563EB"    # blue-600 — primary (Preline)
+ACCENT_SOFT = "#EFF6FF"  # blue-50
+ACCENT_DK = "#1D4ED8"    # blue-700 (hover)
+GOOD = "#16A34A"; WARN = "#D97706"; BAD = "#DC2626"   # green-600 / amber-600 / red-600
+# light Preline app-shell sidebar
+NAV = "#FFFFFF"       # sidebar ground (white)
+NAV2 = "#F3F4F6"      # gray-100 — active/hover item
+NAV_TXT = "#374151"   # gray-700 — nav text
+NAV_MUT = "#6B7280"   # gray-500 — muted
+NAV_LINE = "#E5E7EB"  # gray-200 — sidebar border/dividers
 
 # Native, always-available premium font stacks — no network dependency (remote webfonts
 # were silently failing behind corporate networks and dropping the whole app to an ugly
@@ -51,8 +52,8 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"], 
 /* subtle atmospheric depth on the canvas — a faint indigo wash top-right, warm base */
 [data-testid="stMain"] {{
   background-image:
-    radial-gradient(1100px 460px at 88% -8%, rgba(91,91,214,.07), transparent 60%),
-    radial-gradient(760px 380px at -6% 4%, rgba(91,91,214,.04), transparent 55%) !important;
+    radial-gradient(1100px 460px at 88% -8%, rgba(37,99,235,.04), transparent 60%),
+    radial-gradient(760px 380px at -6% 4%, rgba(37,99,235,.03), transparent 55%) !important;
   background-attachment:fixed !important; }}
 #MainMenu, header[data-testid="stHeader"], footer {{ visibility:hidden; height:0; }}
 [data-testid="stToolbar"] {{ display:none; }}
@@ -74,9 +75,9 @@ html, body, [class*="css"], .stMarkdown, p, span, div, label, li, input, textare
 /* ---- type scale (consistent H1/H2/H3/H4 across the app), system display face ---- */
 h1,h2,h3,h4,.cs-hero .h,.cs-header .cs-title,.cs-steph {{
   font-family:{DISPLAY}; color:{INK}; font-weight:700; }}
-.main h1 {{ font-size:29px; font-weight:800; letter-spacing:-.03em; line-height:1.14; margin:.3rem 0 .7rem; }}
-.main h2 {{ font-size:20.5px; font-weight:700; letter-spacing:-.02em; margin:1.5rem 0 .6rem; }}
-.main h3 {{ font-size:16px; font-weight:700; letter-spacing:-.01em; margin:1.15rem 0 .45rem; }}
+.main h1 {{ font-size:28px; font-weight:700; letter-spacing:-.02em; line-height:1.2; margin:.3rem 0 .7rem; }}
+.main h2 {{ font-size:20px; font-weight:600; letter-spacing:-.015em; margin:1.5rem 0 .6rem; }}
+.main h3 {{ font-size:16px; font-weight:600; letter-spacing:-.01em; margin:1.15rem 0 .45rem; }}
 .main h4 {{ font-size:12.5px; font-weight:700; letter-spacing:.5px; text-transform:uppercase;
   color:{MUTED}; margin:.7rem 0 .3rem; }}
 a {{ color:{ACCENT}; text-decoration:none; }}
@@ -98,7 +99,7 @@ hr {{ border:none !important; border-top:1px solid {LINE} !important; margin:1.1
 /* ============================ step heading ============================ */
 .cs-stepk {{ font-size:10.5px; font-weight:700; letter-spacing:1.3px; text-transform:uppercase;
   color:{ACCENT}; margin-bottom:5px; }}
-.cs-steph {{ font-size:25px; font-weight:750; color:{INK}; margin:0 0 12px; letter-spacing:-.02em; line-height:1.18; }}
+.cs-steph {{ font-size:26px; font-weight:700; color:{INK}; margin:0 0 12px; letter-spacing:-.02em; line-height:1.18; }}
 .cs-progress {{ height:4px; background:{LINE2}; border-radius:999px;
   margin:0 0 20px; overflow:hidden; }}
 /* one consistent in-body section header used across every step */
@@ -106,7 +107,7 @@ hr {{ border:none !important; border-top:1px solid {LINE} !important; margin:1.1
 .cs-section .t {{ font-size:15px; font-weight:700; color:{INK}; letter-spacing:-.01em; }}
 .cs-section .s {{ font-size:12.5px; color:{MUTED}; margin-top:2px; line-height:1.5; }}
 .cs-progress > i {{ display:block; height:100%; border-radius:999px; transition:width .35s cubic-bezier(.4,0,.2,1);
-  background:linear-gradient(90deg,{ACCENT},#6366F1); }}
+  background:{ACCENT}; }}
 
 /* ============================ dark navigation rail ============================ */
 [data-testid="stSidebar"] {{ background:{NAV} !important; border-right:none;
@@ -124,46 +125,38 @@ hr {{ border:none !important; border-top:1px solid {LINE} !important; margin:1.1
 .cs-railstat i {{ width:7px; height:7px; border-radius:50%; flex:0 0 7px; }}
 [data-testid="stSidebar"] label {{ color:{NAV_MUT} !important; font-size:10.5px !important;
   text-transform:uppercase; letter-spacing:.7px; font-weight:600; }}
-/* model selectbox on dark */
-[data-testid="stSidebar"] [data-baseweb="select"] > div {{ background:{NAV2} !important;
-  border-color:{NAV_LINE} !important; color:#fff !important; border-radius:9px !important; }}
-[data-testid="stSidebar"] [data-baseweb="select"] div, [data-testid="stSidebar"] [data-baseweb="select"] span {{ color:#EAECF3 !important; }}
-[data-testid="stSidebar"] [data-baseweb="select"] svg {{ fill:{NAV_MUT} !important; }}
-/* recheck button on dark */
-[data-testid="stSidebar"] .stButton > button {{ background:{NAV2} !important; color:{NAV_TXT} !important;
-  border:1px solid {NAV_LINE} !important; box-shadow:none !important; }}
-[data-testid="stSidebar"] .stButton > button:hover {{ background:#1F2A47 !important; color:#fff !important; border-color:rgba(255,255,255,.18) !important; }}
+/* sidebar selectbox (light Preline) */
+[data-testid="stSidebar"] [data-baseweb="select"] > div {{ background:{CARD} !important;
+  border-color:{LINE} !important; color:{INK} !important; border-radius:8px !important; }}
+[data-testid="stSidebar"] [data-baseweb="select"] div, [data-testid="stSidebar"] [data-baseweb="select"] span {{ color:{INK} !important; }}
+[data-testid="stSidebar"] [data-baseweb="select"] svg {{ fill:{MUTED} !important; }}
+/* sidebar buttons (light Preline secondary) */
+[data-testid="stSidebar"] .stButton > button {{ background:{CARD} !important; color:{INK} !important;
+  border:1px solid {LINE} !important; box-shadow:0 1px 2px rgba(0,0,0,.04) !important; font-weight:500 !important; }}
+[data-testid="stSidebar"] .stButton > button:hover {{ background:{PANEL} !important; color:{INK} !important; border-color:#D1D5DB !important; }}
 [data-testid="stSidebar"] [data-testid="stCaptionContainer"] p {{ color:{NAV_MUT} !important; }}
-/* Odin status alerts on dark compact tinted pills */
-[data-testid="stSidebar"] [data-testid="stAlert"] {{ background:{NAV2} !important; border:1px solid {NAV_LINE} !important; }}
-[data-testid="stSidebar"] [data-testid="stAlert"] * {{ color:{NAV_TXT} !important; }}
 
 .cs-brand {{ display:flex; align-items:center; gap:10px; padding-top:2px; }}
-.cs-brand .m {{ width:30px; height:30px; border-radius:9px;
-  background:linear-gradient(135deg,{ACCENT},#7C5CFF); color:#fff;
-  display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px;
-  box-shadow:0 2px 10px rgba(91,91,214,.45); }}
-.cs-brand .t {{ font-size:15px; font-weight:700; color:#FFFFFF !important; letter-spacing:-.01em; }}
-.cs-brand-sub {{ font-size:9.5px; color:{NAV_MUT} !important; margin:4px 0 20px 40px; text-transform:uppercase;
+.cs-brand .m {{ width:32px; height:32px; border-radius:8px;
+  background:{ACCENT}; color:#fff;
+  display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px;
+  box-shadow:0 1px 2px rgba(0,0,0,.08); }}
+.cs-brand .t {{ font-size:15px; font-weight:600; color:{INK} !important; letter-spacing:-.01em; }}
+.cs-brand-sub {{ font-size:9.5px; color:{NAV_MUT} !important; margin:5px 0 22px 42px; text-transform:uppercase;
   letter-spacing:.9px; font-weight:600; }}
-/* vertical stepper with a connecting spine */
-.cs-step {{ display:flex; align-items:center; gap:12px; padding:9px 11px; border-radius:10px; margin:3px 0;
+/* vertical nav (Preline app-shell): rounded item, blue-soft active, no spine clutter */
+.cs-step {{ display:flex; align-items:center; gap:11px; padding:8px 10px; border-radius:8px; margin:2px 0;
   position:relative; transition:background .12s ease; }}
-.cs-step:hover:not(.now) {{ background:rgba(255,255,255,.03); }}
+.cs-step:hover:not(.now) {{ background:{LINE2}; }}
 .cs-step .n {{ width:22px; height:22px; border-radius:50%; display:flex; align-items:center;
-  justify-content:center; font-size:10.5px; font-weight:700; flex:0 0 22px; position:relative; z-index:1;
-  background:{NAV2}; color:{NAV_MUT}; border:1px solid {NAV_LINE}; transition:all .15s ease; }}
-/* the spine: a segment dropping from each dot to the next */
-.cs-step:not(:last-child) .n::after {{ content:""; position:absolute; top:100%; left:50%;
-  transform:translateX(-50%); width:2px; height:26px; background:{NAV_LINE}; }}
-.cs-step.done .n::after {{ background:{ACCENT}; opacity:.55; }}
-.cs-step .lbl {{ font-size:12.5px; color:{NAV_MUT}; letter-spacing:-.005em; }}
-.cs-step.done .n {{ background:{ACCENT}; color:#fff; border-color:{ACCENT}; }}
+  justify-content:center; font-size:10.5px; font-weight:600; flex:0 0 22px;
+  background:{PANEL}; color:{MUTED}; border:1px solid {LINE}; transition:all .15s ease; }}
+.cs-step .lbl {{ font-size:13px; color:{NAV_TXT}; letter-spacing:-.005em; }}
+.cs-step.done .n {{ background:{ACCENT_SOFT}; color:{ACCENT}; border-color:#BFDBFE; }}
 .cs-step.done .lbl {{ color:{NAV_TXT}; }}
-.cs-step.now {{ background:{NAV2}; }}
-.cs-step.now .n {{ background:{ACCENT}; color:#fff; border-color:{ACCENT};
-  box-shadow:0 0 0 4px rgba(91,91,214,.22); }}
-.cs-step.now .lbl {{ color:#FFFFFF; font-weight:700; }}
+.cs-step.now {{ background:{ACCENT_SOFT}; }}
+.cs-step.now .n {{ background:{ACCENT}; color:#fff; border-color:{ACCENT}; }}
+.cs-step.now .lbl {{ color:{ACCENT_DK}; font-weight:600; }}
 
 /* ============================ reasoning widget (flat margin-note aside) ============================ */
 .cs-reason {{ background:transparent; border:none; border-left:2px solid {LINE}; border-radius:0;
@@ -185,28 +178,25 @@ hr {{ border:none !important; border-top:1px solid {LINE} !important; margin:1.1
 /* ============================ buttons ============================ */
 .stButton > button, .stDownloadButton > button, .stFormSubmitButton > button,
 [data-testid="stBaseButton-secondary"] {{
-  border-radius:10px !important; font-weight:600 !important; font-size:13.5px !important;
+  border-radius:8px !important; font-weight:500 !important; font-size:13.5px !important;
   border:1px solid {LINE} !important; background:{CARD} !important; color:{INK} !important;
-  padding:.5rem 1.2rem !important; min-height:2.55rem !important; line-height:1.2 !important;
-  white-space:nowrap !important; box-shadow:0 1px 1.5px rgba(15,23,42,.04) !important;
-  transition:transform .1s ease, background .13s ease, border-color .13s ease, box-shadow .13s ease !important; }}
+  padding:.55rem 1.1rem !important; min-height:2.6rem !important; line-height:1.2 !important;
+  white-space:nowrap !important; box-shadow:0 1px 2px rgba(16,24,40,.05) !important;
+  transition:background .13s ease, border-color .13s ease, box-shadow .13s ease !important; }}
 .stButton > button *, .stDownloadButton > button *, .stFormSubmitButton > button *,
 [data-testid="stBaseButton-secondary"] *, [data-testid="stBaseButton-primary"] * {{
   color:inherit !important; fill:inherit !important; white-space:nowrap !important; margin:0 !important; }}
 .stButton > button:hover, .stDownloadButton > button:hover {{
-  border-color:{FAINT} !important; background:{PANEL} !important; color:{INK} !important;
-  box-shadow:0 2px 5px rgba(15,23,42,.06) !important; }}
-.stButton > button:active, .stDownloadButton > button:active {{ transform:translateY(.5px) !important; }}
+  border-color:#D1D5DB !important; background:{PANEL} !important; color:{INK} !important; }}
 .stButton > button:focus-visible, .stDownloadButton > button:focus-visible {{
   outline:none !important; box-shadow:0 0 0 3px {ACCENT_SOFT} !important; border-color:{ACCENT} !important; }}
 .stButton > button[kind="primary"], .stDownloadButton > button[kind="primary"],
 [data-testid="stBaseButton-primary"] {{
-  background:linear-gradient(135deg,{ACCENT},{ACCENT_DK}) !important; color:#fff !important;
-  border:1px solid {ACCENT_DK} !important; font-weight:650 !important;
-  box-shadow:0 2px 8px rgba(91,91,214,.28) !important; }}
+  background:{ACCENT} !important; color:#fff !important;
+  border:1px solid {ACCENT} !important; font-weight:500 !important;
+  box-shadow:0 1px 2px rgba(16,24,40,.08) !important; }}
 .stButton > button[kind="primary"]:hover, [data-testid="stBaseButton-primary"]:hover {{
-  background:linear-gradient(135deg,#6A6AE0,{ACCENT}) !important; color:#fff !important;
-  box-shadow:0 4px 14px rgba(91,91,214,.38) !important; transform:translateY(-1px) !important; }}
+  background:{ACCENT_DK} !important; border-color:{ACCENT_DK} !important; color:#fff !important; }}
 .stButton > button:disabled, [data-testid="stBaseButton-primary"]:disabled,
 [data-testid="stBaseButton-secondary"]:disabled {{
   background:{PANEL} !important; color:{FAINT} !important; border:1px solid {LINE} !important;
@@ -218,7 +208,7 @@ hr {{ border:none !important; border-top:1px solid {LINE} !important; margin:1.1
 .stTextInput input, .stTextArea textarea, .stNumberInput input,
 [data-baseweb="select"] input, [data-baseweb="textarea"] {{
   background-color:{CARD} !important; color:{INK} !important;
-  border-color:{LINE} !important; border-radius:10px !important; }}
+  border-color:{LINE} !important; border-radius:8px !important; }}
 .stTextInput input::placeholder, .stTextArea textarea::placeholder {{ color:{FAINT} !important; }}
 /* focus ring on the wrapping control */
 .stTextInput div[data-baseweb="input"]:focus-within, .stTextArea div[data-baseweb="textarea"]:focus-within,
@@ -231,9 +221,10 @@ hr {{ border:none !important; border-top:1px solid {LINE} !important; margin:1.1
 [role="option"], li[role="option"] {{ background-color:{CARD} !important; color:{INK} !important; }}
 [role="option"]:hover, li[role="option"]:hover, [aria-selected="true"][role="option"] {{
   background-color:{PANEL} !important; color:{INK} !important; }}
-/* multiselect tags */
-[data-baseweb="tag"] {{ background-color:{INK} !important; color:#fff !important; border-radius:6px !important; }}
-[data-baseweb="tag"] span, [data-baseweb="tag"] svg {{ color:#fff !important; fill:#fff !important; }}
+/* multiselect tags — Preline soft blue badge */
+[data-baseweb="tag"] {{ background-color:{ACCENT_SOFT} !important; color:{ACCENT_DK} !important;
+  border:1px solid #BFDBFE !important; border-radius:6px !important; }}
+[data-baseweb="tag"] span, [data-baseweb="tag"] svg {{ color:{ACCENT_DK} !important; fill:{ACCENT_DK} !important; }}
 /* radio */
 .stRadio [role="radiogroup"] label {{ color:{BODY} !important; }}
 /* file uploader */
@@ -259,7 +250,7 @@ hr {{ border:none !important; border-top:1px solid {LINE} !important; margin:1.1
 .stTabs [data-baseweb="tab"] * {{ color:inherit !important; font-weight:inherit !important; }}
 .stTabs [data-baseweb="tab"]:hover {{ background:{PANEL} !important; color:{INK} !important; }}
 .stTabs [data-baseweb="tab"][aria-selected="true"] {{
-  color:{INK} !important; font-weight:700 !important; border-bottom:2px solid {INK} !important; }}
+  color:{ACCENT} !important; font-weight:600 !important; border-bottom:2px solid {ACCENT} !important; }}
 /* hide BaseWeb's default sliding highlight bar (we use our own border) */
 .stTabs [data-baseweb="tab-highlight"], .stTabs [data-baseweb="tab-border"] {{ display:none !important; }}
 .stTabs [data-baseweb="tab-panel"] {{ padding-top:14px !important; }}
@@ -270,11 +261,10 @@ div[data-testid="stExpander"] summary:hover {{ background:{PANEL} !important; }}
 div[data-testid="stExpander"] summary p, div[data-testid="stExpander"] summary span {{
   font-weight:600 !important; color:{INK} !important; font-size:13.5px !important; }}
 /* FAQ section header — sets the accordion apart from body prose */
-.cs-faq-head {{ font-family:{DISPLAY}; font-weight:800; font-size:20.5px;
-  color:{INK}; margin:26px 0 2px; padding-top:16px; border-top:1px solid {LINE2};
+.cs-faq-head {{ font-family:{DISPLAY}; font-weight:700; font-size:20px;
+  color:{INK}; margin:26px 0 2px; padding-top:16px; border-top:1px solid {LINE};
   display:flex; align-items:center; gap:10px; }}
-.cs-faq-head::before {{ content:""; width:5px; height:20px; border-radius:3px;
-  background:linear-gradient(180deg,{ACCENT},{ACCENT_DK}); }}
+.cs-faq-head::before {{ content:""; width:4px; height:19px; border-radius:3px; background:{ACCENT}; }}
 .cs-faq-sub {{ color:{MUTED}; font-size:13px; margin:0 0 12px 15px; }}
 /* ============================ pre-flight quality panel + gate chips ============================ */
 .cs-qhead {{ display:flex; align-items:center; gap:9px; font-size:14px; color:{INK};
@@ -298,12 +288,13 @@ div[data-testid="stExpander"] summary p, div[data-testid="stExpander"] summary s
 /* alerts: prominent + well-padded so errors/success read at a glance
    (Streamlit tints the background per kind - red/amber/green/blue - we keep that
    and add generous padding, a rounded shape, and readable text) */
-[data-testid="stAlert"] {{ border-radius:12px !important; padding:13px 17px !important;
-  box-shadow:0 1px 3px rgba(15,23,42,.06) !important; }}
+[data-testid="stAlert"] {{ border-radius:10px !important; padding:12px 15px !important;
+  box-shadow:none !important; }}
 [data-testid="stAlert"] p {{ font-size:13.5px !important; line-height:1.55 !important; font-weight:500 !important; }}
-/* container cards (st.container(border=True)) — FLAT: quiet hairline, no shadow, no lift */
-[data-testid="stVerticalBlockBorderWrapper"] {{ border-radius:14px !important;
-  border:1px solid {LINE} !important; box-shadow:none !important; background:{CARD} !important; }}
+/* container cards (st.container(border=True)) — Preline: white, gray-200 border, rounded-xl, whisper shadow */
+[data-testid="stVerticalBlockBorderWrapper"] {{ border-radius:12px !important;
+  border:1px solid {LINE} !important; background:{CARD} !important;
+  box-shadow:0 1px 2px 0 rgba(16,24,40,.04) !important; }}
 hr {{ border-color:{LINE} !important; }}
 .stSelectbox label, .stTextInput label, .stTextArea label, .stMultiSelect label, .stRadio label {{
   font-weight:600 !important; color:{INK} !important; }}
@@ -348,7 +339,7 @@ hr {{ border-color:{LINE} !important; }}
 .cs-foq .q {{ font-size:14px; font-weight:650; color:{INK}; line-height:1.4; }}
 .cs-foq .bar {{ height:5px; background:{LINE2}; border-radius:999px; margin:7px 0 6px; overflow:hidden; max-width:300px; }}
 .cs-foq .bar > i {{ display:block; height:100%; border-radius:999px;
-  background:linear-gradient(90deg,{ACCENT},#6366F1); }}
+  background:{ACCENT}; }}
 .cs-foq .meta {{ font-size:11px; color:{MUTED}; margin-bottom:4px; letter-spacing:.1px; }}
 .cs-foq .meta b {{ color:{BODY}; }}
 .cs-foq .rz {{ font-size:12.3px; color:{BODY}; line-height:1.5; margin:2px 0; }}
@@ -416,12 +407,12 @@ hr {{ border-color:{LINE} !important; }}
 
 /* --- landing / objective hero + option cards --- */
 .cs-hero {{ margin:2px 0 26px; }}
-.cs-hero .h {{ font-size:33px; font-weight:800; letter-spacing:-.035em; color:{INK}; margin:0 0 11px; line-height:1.08; max-width:15ch; }}
+.cs-hero .h {{ font-size:32px; font-weight:700; letter-spacing:-.025em; color:{INK}; margin:0 0 11px; line-height:1.08; max-width:15ch; }}
 .cs-hero .s {{ font-size:15px; color:{MUTED}; max-width:600px; line-height:1.6; margin:0; }}
 .cs-opt {{ padding:6px 4px 12px; }}
 .cs-opt .iconbadge {{ width:44px; height:44px; border-radius:12px; display:flex; align-items:center;
   justify-content:center; color:{ACCENT}; background:{ACCENT_SOFT};
-  border:1px solid #E1E2FB; margin-bottom:14px; box-shadow:0 2px 8px -3px rgba(91,91,214,.35); }}
+  border:1px solid #DBEAFE; margin-bottom:14px; box-shadow:none; }}
 .cs-opt .ic {{ font-size:24px; line-height:1; }}
 .cs-opt .ti {{ font-size:17px; font-weight:700; color:{INK}; margin:2px 0 6px; letter-spacing:-.01em; }}
 .cs-opt .de {{ font-size:13.5px; color:{MUTED}; line-height:1.6; min-height:64px; }}
@@ -474,7 +465,7 @@ hr {{ border-color:{LINE} !important; }}
   backdrop-filter:saturate(1.2) blur(10px); -webkit-backdrop-filter:saturate(1.2) blur(10px);
   display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; }}
 .cs-footer .l {{ display:flex; align-items:center; gap:9px; font-size:12.5px; color:{MUTED}; }}
-.cs-footer .l .m {{ width:20px; height:20px; border-radius:6px; background:linear-gradient(135deg,{ACCENT},#7C5CFF);
+.cs-footer .l .m {{ width:20px; height:20px; border-radius:6px; background:{ACCENT};
   color:#fff; display:inline-flex; align-items:center; justify-content:center; font-weight:800; font-size:10px; }}
 .cs-footer .l b {{ color:{INK}; font-weight:700; }}
 .cs-footer .r {{ font-size:12px; color:{FAINT}; }}
