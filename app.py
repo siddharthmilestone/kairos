@@ -940,7 +940,7 @@ def _render_author_safety(opts: dict, biz_name: str):
         title = ac2.text_input("Author title / role", value=a.get("title") or "Editorial Team",
                                key="author_title_in")
         bio = st.text_area("Author bio (credibility, first-hand expertise)", value=a.get("bio") or "",
-                           height=70, key="author_bio_in",
+                           height=72, key="author_bio_in",
                            placeholder="e.g. Two decades hosting guests on-property; writes from direct experience.")
         st.session_state.author = {"name": name.strip(), "title": title.strip(), "bio": bio.strip()}
 
@@ -950,7 +950,7 @@ def _render_author_safety(opts: dict, biz_name: str):
                            value=", ".join(bs.get("restricted_terms") or []), key="brand_rt_in",
                            placeholder="cheap, world-class, guaranteed, competitor names…")
         dis = st.text_area("Required disclaimers (one per line) — included where relevant",
-                           value="\n".join(bs.get("required_disclaimers") or []), height=60,
+                           value="\n".join(bs.get("required_disclaimers") or []), height=72,
                            key="brand_dis_in", placeholder="Rates are subject to availability.")
         st.session_state.brand_safety = {
             "restricted_terms": [t.strip() for t in rt.split(",") if t.strip()],
@@ -1414,6 +1414,10 @@ with main:
             with st.container(border=True):
                 st.markdown(
                     "<div class='cs-opt'>"
+                    "<div class='iconbadge'><svg viewBox='0 0 24 24' fill='none' width='22' height='22'>"
+                    "<path d='M12 3v4M12 3l-2.2 1.3M12 3l2.2 1.3M5 8.5l3.5 2M19 8.5l-3.5 2M12 21a6 6 0 0 0 "
+                    "6-6c0-2.5-1.8-4.2-3-5.5-1-1.1-1.4-2-1.4-2h-3.2s-.4.9-1.4 2C9.8 10.8 8 12.5 8 15a6 6 0 0 0 4 6Z' "
+                    "stroke='currentColor' stroke-width='1.6' stroke-linejoin='round'/></svg></div>"
                     "<div class='ti'>Create New Content</div>"
                     "<div class='de'>Start from a grounded opportunity and generate a publish-ready, "
                     "citable page: researched, written, and KAIROS-scored end to end.</div></div>",
@@ -1425,6 +1429,10 @@ with main:
             with st.container(border=True):
                 st.markdown(
                     "<div class='cs-opt'>"
+                    "<div class='iconbadge'><svg viewBox='0 0 24 24' fill='none' width='22' height='22'>"
+                    "<path d='M20 12a8 8 0 1 1-2.3-5.6M20 4v3.5h-3.5' stroke='currentColor' stroke-width='1.6' "
+                    "stroke-linecap='round' stroke-linejoin='round'/><circle cx='12' cy='12' r='2.6' "
+                    "stroke='currentColor' stroke-width='1.6'/></svg></div>"
                     "<div class='ti'>Optimize An Existing Page</div>"
                     "<div class='de'>Paste a URL. We crawl the real copy, audit it against AI-search "
                     "demand, and rewrite it to win citations without losing what works.</div></div>",

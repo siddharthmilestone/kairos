@@ -40,6 +40,12 @@ CSS = f"""
 :root {{ color-scheme: light !important; }}
 html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"], .main {{
   background-color:{BG} !important; }}
+/* subtle atmospheric depth on the canvas — a faint indigo wash top-right, warm base */
+[data-testid="stMain"] {{
+  background-image:
+    radial-gradient(1100px 460px at 88% -8%, rgba(91,91,214,.07), transparent 60%),
+    radial-gradient(760px 380px at -6% 4%, rgba(91,91,214,.04), transparent 55%) !important;
+  background-attachment:fixed !important; }}
 #MainMenu, header[data-testid="stHeader"], footer {{ visibility:hidden; height:0; }}
 [data-testid="stToolbar"] {{ display:none; }}
 /* work canvas: capped + centered so the full app (264px rail + content) frames to ~1440 */
@@ -76,11 +82,13 @@ hr {{ border:none !important; border-top:1px solid {LINE} !important; margin:1.1
 
 /* ============================ header ============================ */
 .cs-header {{ position:relative; background:
-    linear-gradient(180deg,#FFFFFF 0%,#FDFDFF 100%); border:1px solid {LINE}; border-radius:16px;
-  padding:18px 22px; margin-bottom:22px; overflow:hidden;
-  box-shadow:0 4px 20px rgba(15,23,42,.05), 0 1px 2px rgba(15,23,42,.03); }}
+    linear-gradient(180deg,#FFFFFF 0%,#FCFCFE 100%); border:1px solid {LINE}; border-radius:16px;
+  padding:17px 22px 16px; margin-bottom:20px; overflow:hidden;
+  box-shadow:0 8px 30px -12px rgba(23,27,58,.14), 0 1px 2px rgba(15,23,42,.04); }}
 .cs-header::before {{ content:""; position:absolute; left:0; top:0; bottom:0; width:4px;
   background:linear-gradient(180deg,{ACCENT},{ACCENT_DK}); }}
+.cs-header::after {{ content:""; position:absolute; right:-60px; top:-70px; width:220px; height:220px;
+  border-radius:50%; background:radial-gradient(circle,rgba(91,91,214,.06),transparent 70%); pointer-events:none; }}
 .cs-header .cs-row {{ display:flex; align-items:center; gap:13px; }}
 .cs-mark {{ width:38px; height:38px; border-radius:11px;
   background:linear-gradient(135deg,{ACCENT},{ACCENT_DK}); color:#fff;
@@ -278,14 +286,34 @@ div[data-testid="stExpander"] summary p, div[data-testid="stExpander"] summary s
 .cs-faq-head::before {{ content:""; width:5px; height:20px; border-radius:3px;
   background:linear-gradient(180deg,{ACCENT},{ACCENT_DK}); }}
 .cs-faq-sub {{ color:{MUTED}; font-size:13px; margin:0 0 12px 15px; }}
+/* ============================ pre-flight quality panel + gate chips ============================ */
+.cs-qhead {{ display:flex; align-items:center; gap:9px; font-size:14px; color:{INK};
+  letter-spacing:-.01em; margin:1px 0 12px; flex-wrap:wrap; }}
+.cs-qhead b {{ font-weight:750; }}
+.cs-qdot {{ width:9px; height:9px; border-radius:50%; flex:0 0 9px; }}
+.cs-q-good .cs-qdot {{ background:{GOOD}; box-shadow:0 0 0 4px {GOOD}22; }}
+.cs-q-warn .cs-qdot {{ background:{WARN}; box-shadow:0 0 0 4px {WARN}22; }}
+.cs-q-bad  .cs-qdot {{ background:{BAD};  box-shadow:0 0 0 4px {BAD}22; }}
+.cs-qmeta {{ margin-left:auto; font-size:12px; color:{MUTED}; font-weight:500;
+  font-variant-numeric:tabular-nums; }}
+.cs-gates {{ display:flex; flex-wrap:wrap; gap:7px; }}
+.cs-gate {{ display:inline-flex; align-items:center; gap:6px; font-size:11.5px; font-weight:600;
+  padding:5px 11px; border-radius:8px; border:1px solid transparent; white-space:nowrap;
+  letter-spacing:.1px; cursor:default; transition:transform .1s ease; }}
+.cs-gate:hover {{ transform:translateY(-1px); }}
+.cs-gate-pass {{ background:#E9F7F0; color:#0B7A54; border-color:#CDEBDF; }}
+.cs-gate-warn {{ background:#FBF3E2; color:#8A6410; border-color:#F1E2C0; }}
+.cs-gate-fail {{ background:#FBEBEC; color:#B0293A; border-color:#F3D3D6; }}
+
 /* alerts: prominent + well-padded so errors/success read at a glance
    (Streamlit tints the background per kind - red/amber/green/blue - we keep that
    and add generous padding, a rounded shape, and readable text) */
 [data-testid="stAlert"] {{ border-radius:12px !important; padding:13px 17px !important;
   box-shadow:0 1px 3px rgba(15,23,42,.06) !important; }}
 [data-testid="stAlert"] p {{ font-size:13.5px !important; line-height:1.55 !important; font-weight:500 !important; }}
-/* container cards (st.container(border=True)), soften */
-[data-testid="stVerticalBlockBorderWrapper"] {{ border-radius:12px !important; }}
+/* container cards (st.container(border=True)) — soft, elevated, premium */
+[data-testid="stVerticalBlockBorderWrapper"] {{ border-radius:14px !important;
+  box-shadow:0 1px 2px rgba(15,23,42,.03), 0 10px 30px -18px rgba(23,27,58,.16) !important; }}
 hr {{ border-color:{LINE} !important; }}
 .stSelectbox label, .stTextInput label, .stTextArea label, .stMultiSelect label, .stRadio label {{
   font-weight:600 !important; color:{INK} !important; }}
@@ -400,9 +428,12 @@ hr {{ border-color:{LINE} !important; }}
 .cs-hero {{ margin:2px 0 24px; }}
 .cs-hero .h {{ font-size:29px; font-weight:800; letter-spacing:-.03em; color:{INK}; margin:0 0 10px; line-height:1.12; }}
 .cs-hero .s {{ font-size:14.5px; color:{MUTED}; max-width:660px; line-height:1.62; margin:0; }}
-.cs-opt {{ padding:4px 4px 12px; }}
+.cs-opt {{ padding:6px 4px 12px; }}
+.cs-opt .iconbadge {{ width:44px; height:44px; border-radius:12px; display:flex; align-items:center;
+  justify-content:center; color:{ACCENT}; background:{ACCENT_SOFT};
+  border:1px solid #E1E2FB; margin-bottom:14px; box-shadow:0 2px 8px -3px rgba(91,91,214,.35); }}
 .cs-opt .ic {{ font-size:24px; line-height:1; }}
-.cs-opt .ti {{ font-size:17px; font-weight:700; color:{INK}; margin:12px 0 6px; letter-spacing:-.01em; }}
+.cs-opt .ti {{ font-size:17px; font-weight:700; color:{INK}; margin:2px 0 6px; letter-spacing:-.01em; }}
 .cs-opt .de {{ font-size:13.5px; color:{MUTED}; line-height:1.6; min-height:64px; }}
 .cs-hint {{ font-size:12.5px; color:{FAINT}; margin-top:18px; text-align:center; }}
 .cs-hint b {{ color:{BODY}; }}
