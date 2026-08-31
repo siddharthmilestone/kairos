@@ -88,7 +88,11 @@ def have_cli(name: str, extra: list[Path]) -> bool:
 
 def print_cli_status() -> None:
     home = Path.home()
-    odin_ok = have_cli("odin", [home / ".odin" / "bin" / "odin", home / ".odin" / "bin" / "odin.exe"])
+    odin_ok = have_cli("odin", [
+        home / ".odin" / "bin" / "odin.ps1",
+        home / ".odin" / "bin" / "odin",
+        home / ".odin" / "bin" / "odin.exe",
+    ])
     claude_ok = have_cli(
         "claude",
         [

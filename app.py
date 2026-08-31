@@ -22,18 +22,28 @@ st.set_page_config(page_title="Project Kairos", page_icon="", layout="wide")
 ui.inject_css()
 
 
+def _passcode_from_secrets():
+    """Read KAIROS_APP_PASSWORD from secrets.toml only if the file exists.
+
+    Touching st.secrets with no file makes Streamlit paint a red
+    'No secrets found' error even when the exception is caught.
+    """
+    roots = [Path(__file__).resolve().parent, Path.home()]
+    if not any((root / ".streamlit" / "secrets.toml").is_file() for root in roots):
+        return None
+    try:
+        return st.secrets.get("KAIROS_APP_PASSWORD")  # type: ignore[attr-defined]
+    except Exception:  # noqa: BLE001 — missing/empty secrets is the same as unset
+        return None
+
+
 def _require_passcode():
     """Optional shared-link access gate for self-hosting. If KAIROS_APP_PASSWORD is set
     (env var or .streamlit/secrets.toml), visitors must enter it before using the app.
     If it is not set, the app is open (no gate). This is an app-level passcode set by the
     host, not a user credential."""
     import os as _os
-    pw = _os.environ.get("KAIROS_APP_PASSWORD")
-    if not pw:
-        try:
-            pw = st.secrets.get("KAIROS_APP_PASSWORD")  # type: ignore[attr-defined]
-        except Exception:  # noqa: BLE001 — no secrets file is fine
-            pw = None
+    pw = _os.environ.get("KAIROS_APP_PASSWORD") or _passcode_from_secrets()
     if not pw:
         return  # no passcode configured → open access
     if st.session_state.get("_authed"):

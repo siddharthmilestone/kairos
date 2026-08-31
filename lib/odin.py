@@ -13,7 +13,7 @@ from functools import lru_cache
 from typing import Any
 
 HOME = os.path.expanduser("~")
-ODIN_BIN = os.environ.get("ODIN_BIN") or shutil.which("odin") or f"{HOME}/.odin/bin/odin"
+_HOME_ODIN_BIN = os.path.join(HOME, ".odin", "bin")
 
 REAUTH_MESSAGE = ("Odin session expired — your multi-factor sign-in needs refreshing. "
                   "Run `odin auth login` in a terminal, complete MFA, then reload this page.")
@@ -35,9 +35,77 @@ def _is_reauth(text: str) -> bool:
     return any(s in t for s in _REAUTH_SIGNS)
 
 
+def _looks_like_unix_script(path: str) -> bool:
+    try:
+        with open(path, "rb") as f:
+            return f.read(2) == b"#!"
+    except OSError:
+        return False
+
+
+def _powershell() -> str:
+    return shutil.which("pwsh") or shutil.which("powershell") or "powershell"
+
+
+def _argv_for(path: str) -> list[str]:
+    """Build the argv prefix that can actually execute this Odin wrapper on this OS.
+
+    The Odin installer ships a Unix `odin` shell script and, on Windows, `odin.ps1`.
+    Python's CreateProcess cannot run the shell script (WinError 193), so Windows
+    must go through PowerShell + the .ps1. Mac/Linux exec the `odin` script as-is.
+    Paths are resolved from $ODIN_BIN, PATH, or ~/.odin/bin — never a specific user.
+    """
+    path = os.path.expanduser(path)
+    if os.name == "nt":
+        ps1 = path if path.lower().endswith(".ps1") else os.path.join(
+            os.path.dirname(path) or _HOME_ODIN_BIN, "odin.ps1")
+        if (path.lower().endswith(".ps1") or _looks_like_unix_script(path)) and os.path.isfile(ps1):
+            return [_powershell(), "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ps1]
+    return [path]
+
+
+def _odin_argv() -> list[str]:
+    override = (os.environ.get("ODIN_BIN") or "").strip()
+    if override:
+        return _argv_for(override)
+
+    home_ps1 = os.path.join(_HOME_ODIN_BIN, "odin.ps1")
+    home_sh = os.path.join(_HOME_ODIN_BIN, "odin")
+    which = shutil.which("odin")
+
+    if os.name == "nt":
+        for candidate in (
+            home_ps1,
+            os.path.join(_HOME_ODIN_BIN, "odin.cmd"),
+            os.path.join(_HOME_ODIN_BIN, "odin.exe"),
+            which,
+            home_sh,
+        ):
+            if candidate and os.path.isfile(candidate):
+                return _argv_for(candidate)
+        return _argv_for(home_ps1)
+
+    if which:
+        return _argv_for(which)
+    return _argv_for(home_sh)
+
+
+# Resolved wrapper path (for display / ODIN_BIN-style debugging). The real
+# invocation is `_odin_argv()` and may be `powershell -File odin.ps1` on Windows.
+ODIN_BIN = os.environ.get("ODIN_BIN") or shutil.which("odin") or (
+    os.path.join(_HOME_ODIN_BIN, "odin.ps1") if os.name == "nt"
+    else os.path.join(_HOME_ODIN_BIN, "odin")
+)
+
+
 def _env(scope: str | None = None, kind: str = "hospitality") -> dict[str, str]:
     env = dict(os.environ)
-    env["PATH"] = f"{HOME}/.odin/bin:" + env.get("PATH", "")
+    extra = [
+        _HOME_ODIN_BIN,
+        os.path.join(HOME, ".bun", "bin"),
+        os.path.join(HOME, ".local", "bin"),
+    ]
+    env["PATH"] = os.pathsep.join([p for p in extra if os.path.isdir(p)] + [env.get("PATH", "")])
     if scope:
         env["ODIN_CONTEXT_SCOPE"] = scope
     env["ODIN_KIND"] = kind
@@ -47,10 +115,12 @@ def _env(scope: str | None = None, kind: str = "hospitality") -> dict[str, str]:
 def _run(args: list[str], scope: str | None = None, kind: str = "hospitality",
          timeout: int = 90) -> str:
     proc = subprocess.run(
-        [ODIN_BIN, *args],
+        [*_odin_argv(), *args],
         env=_env(scope, kind),
         capture_output=True,
         text=True,
+        encoding="utf-8",
+        errors="replace",
         timeout=timeout,
     )
     if proc.returncode != 0:

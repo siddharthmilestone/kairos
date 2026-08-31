@@ -94,6 +94,7 @@ If Odin is not connected: run `odin auth login`, then **Recheck Odin** in
 | Python still missing after install | Close the window, open a **new** one, double-click Kairos again. |
 | Port already in use | Close the other Kairos window, or set `PORT=8502`. |
 | Odin: sign-in needed | `odin auth login`, then Recheck Odin. |
+| Could not reach Odin / WinError 193 | Fixed in this build: Kairos uses `odin.ps1` on Windows and `odin` on Mac. Click **Recheck Odin**. |
 | Engine red / generation fails | `claude` then `/login`. |
 | Mac: permission denied | `chmod +x Kairos.command setup.sh run.sh scripts/ensure_python.sh` |
 | Mac: unidentified developer | Right-click **Kairos.command** → **Open** → **Open**. |
