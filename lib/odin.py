@@ -30,6 +30,12 @@ class OdinAuthError(RuntimeError):
     'no grounding data'."""
 
 
+def odin_installed() -> bool:
+    """Whether the Odin CLI exists on this machine. External testers won't have it (Odin is
+    an internal Milestone tool) — the app then runs entirely in public-web (Non-Odin) mode."""
+    return bool(shutil.which("odin")) or os.path.exists(ODIN_BIN)
+
+
 def _is_reauth(text: str) -> bool:
     t = (text or "").lower()
     return any(s in t for s in _REAUTH_SIGNS)
@@ -46,13 +52,19 @@ def _env(scope: str | None = None, kind: str = "hospitality") -> dict[str, str]:
 
 def _run(args: list[str], scope: str | None = None, kind: str = "hospitality",
          timeout: int = 90) -> str:
-    proc = subprocess.run(
-        [ODIN_BIN, *args],
-        env=_env(scope, kind),
-        capture_output=True,
-        text=True,
-        timeout=timeout,
-    )
+    try:
+        proc = subprocess.run(
+            [ODIN_BIN, *args],
+            env=_env(scope, kind),
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+        )
+    except FileNotFoundError as e:  # Odin CLI not installed (typical for external testers)
+        raise RuntimeError(
+            "The Odin CLI is not installed on this machine. Choose a "
+            "'Non-Odin business' to ground from the public web instead."
+        ) from e
     if proc.returncode != 0:
         err = proc.stderr.strip() or proc.stdout.strip()
         if _is_reauth(err):

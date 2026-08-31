@@ -92,7 +92,9 @@ def ss(key, default):
 
 ss("step", 0)
 ss("mode", None)
-ss("grounding_source", "odin")  # "odin" (memory graph) | "llm" (public web, non-Odin business)
+# Default to Odin when its CLI is present, else public-web (so external testers without the
+# internal Odin CLI land straight in a working mode).
+ss("grounding_source", "odin" if odin.odin_installed() else "llm")
 
 
 def is_llm() -> bool:
@@ -1497,10 +1499,13 @@ with main:
                 "graph. A **Non-Odin business** is grounded entirely from the **public web via the "
                 "LLM**, for any business that isn't ingested into Odin.")
         # Square tile chooser (border-radius 5px) instead of a plain radio
+        odin_here = odin.odin_installed()
         cur_llm = is_llm()
+        odin_desc = ("Grounded from the Odin memory graph." if odin_here
+                     else "Odin CLI not detected on this machine (internal Milestone tool).")
         t1, t2 = st.columns(2)
         for col, is_non, title, desc, key_ in [
-            (t1, False, "Odin Business", "Grounded from the Odin memory graph.", "src_odin"),
+            (t1, False, "Odin Business", odin_desc, "src_odin"),
             (t2, True, "Non-Odin Business", "Grounded from the public web via the LLM.", "src_llm")]:
             sel = (cur_llm == is_non)
             col.markdown(
@@ -1547,6 +1552,12 @@ with main:
 
         # ---- Odin business ----
         st.session_state.pop("public_profile", None)
+        if not odin_here:
+            st.info("The **Odin CLI isn't installed on this machine** (it's an internal Milestone "
+                    "tool). Pick **Non-Odin Business** above to ground from the public web — that's "
+                    "the mode for testing without Odin.")
+            nav(next_disabled=True)
+            st.stop()
         st.write("Which business profile should we ground against? (live from Odin)")
         clients: list[dict] = []
         # This is the one place we verify Odin live (behind a spinner) and cache the result,

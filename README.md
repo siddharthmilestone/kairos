@@ -5,6 +5,9 @@ business's Odin memory-graph knowledge into publish-ready content that AI answer
 will cite, with **every business fact traced to the graph** (no hallucination), then scores,
 validates, and certifies the result.
 
+> **Just want to try it?** See **[QUICKSTART.md](QUICKSTART.md)** — run it locally on your own
+> Claude account in ~3 minutes, no Odin or API key required (it uses public-web grounding).
+
 - **Engine:** the local **Claude Code CLI** (`claude -p`, headless) - uses your Claude login, **no API key**.
 - **Grounding:** the local **Odin CLI** (Context Memory Graph), read-only, Entra-authenticated.
 - **Standard:** **KAIROS** = **K**nowledge, **A**uthority, **I**ntent, **R**etrieval, **O**riginality, **S**tructure.

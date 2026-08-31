@@ -13,4 +13,6 @@ export PATH="$HOME/.odin/bin:$HOME/.local/bin:$PATH"
 
 PORT="${PORT:-8501}"
 echo "▶ Starting Project Kairos on http://localhost:${PORT}"
-exec ./.venv/bin/streamlit run app.py --server.port "${PORT}" "$@"
+echo "  (Tip: choose a 'Non-Odin Business' to test without the internal Odin tool.)"
+exec ./.venv/bin/streamlit run app.py \
+  --server.address localhost --server.port "${PORT}" --server.headless true "$@"
