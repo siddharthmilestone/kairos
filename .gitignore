@@ -22,3 +22,9 @@ data/_cache/
 
 # local editor/agent config
 .claude/
+
+# Desktop launcher build (PyInstaller)
+build/
+dist/
+*.spec.bak
+/Kairos.exe

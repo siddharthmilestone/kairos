@@ -11,7 +11,21 @@ validates, and certifies the result.
 
 ---
 
-## Quick start
+## Install on your computer (Windows and Mac)
+
+Kairos is a **desktop app** on each person's machine. Guide: **[INSTALL.md](INSTALL.md)**.
+
+**Share the whole `kairos` folder** (zip or `git clone`). Do not send only
+`Kairos.bat` / `Kairos.exe` — those files need `app.py`, `lib/`, `prompts/`, and
+`scripts/` next to them. Skip `.venv` and `data/_cache` (recreated on each PC).
+
+- **Windows:** double-click `Kairos.bat`. It installs Python 3.9+ if needed, then opens the app.
+- **Mac:** `chmod +x Kairos.command`, then double-click `Kairos.command` (same Python auto-install).
+
+Still required once per machine: **Odin** (`odin auth login`) and the **Claude Code CLI**
+(`claude` then `/login`).
+
+### Quick start (developers)
 
 ```bash
 cd kairos
@@ -20,10 +34,6 @@ python3 -m venv .venv
 .venv/bin/python -m playwright install chromium   # for the Optimize-path crawl
 .venv/bin/python -m streamlit run app.py           # http://localhost:8501
 ```
-
-**Requires:** Python 3.9+, the **Odin CLI** authenticated (`odin auth login`, then
-`odin auth status` shows authenticated), and the **Claude Code CLI** logged in
-(`claude --version`).
 
 ---
 
@@ -105,7 +115,10 @@ steps use a fast model automatically; only the final draft uses the model you pi
 ```
 kairos/
   app.py                 # Streamlit wizard: routing (ORDER_CREATE/OPTIMIZE/PRCAL), all step UIs
-  requirements.txt · run.sh · setup.sh
+  requirements.txt · INSTALL.md
+  setup.bat · Kairos.bat                # Windows (optional: scripts/build_windows_exe.bat → Kairos.exe)
+  setup.sh · run.sh · Kairos.command    # Mac
+  scripts/launch.py · scripts/kairos.spec
   lib/
     odin.py              # Odin CLI wrapper: auth/probe, clients, query, semantic search, deep grounding
     prompt.py            # builds the content prompt; render_grounding_context; format guidelines

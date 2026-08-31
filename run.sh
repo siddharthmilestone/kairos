@@ -1,16 +1,12 @@
 #!/usr/bin/env bash
-# Launch the Project Kairos.
+# Launch Project Kairos in the browser (Mac / Linux).
 set -euo pipefail
 cd "$(dirname "$0")"
-
-if [ ! -x "./.venv/bin/streamlit" ]; then
-  echo "✖ .venv not found. Run ./setup.sh first." >&2
-  exit 1
-fi
-
-# Make sure the odin and claude CLIs are reachable from inside the app.
 export PATH="$HOME/.odin/bin:$HOME/.local/bin:$PATH"
 
-PORT="${PORT:-8501}"
-echo "▶ Starting Project Kairos on http://localhost:${PORT}"
-exec ./.venv/bin/streamlit run app.py --server.port "${PORT}" "$@"
+if [ -x "./.venv/bin/python" ] && "./.venv/bin/python" -c "import sys; raise SystemExit(0 if sys.version_info >= (3, 9) else 1)" 2>/dev/null; then
+  exec "./.venv/bin/python" scripts/launch.py "$@"
+fi
+
+PY="$(bash scripts/ensure_python.sh)"
+exec "$PY" scripts/launch.py "$@"
